@@ -15,8 +15,8 @@ jobs:
           ls -la
       - name: Build Frontend
         run: |
-          npm install
-          npm run build
+          yarn install
+          yarn build
       - name: Deploy to Heroku Frontend
         uses: akhileshns/heroku-deploy@v3.13.15
         with:
