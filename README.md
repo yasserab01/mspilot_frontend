@@ -11,7 +11,7 @@
 <p>&nbsp;</p>
 
 
-Get started and build your dream web app with Horizon UI, the most trendiest &
+Get started and build test your dream web app with Horizon UI, the most trendiest &
 innovative Open Source Admin Template for Chakra UI & React!
 
 ---
