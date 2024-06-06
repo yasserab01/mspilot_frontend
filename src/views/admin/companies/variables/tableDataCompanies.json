@@ -1,0 +1,52 @@
+[
+  {
+    "username": "john_doe",
+    "email": "john@example.com",
+    "actions": "edit/delete"
+  },
+  {
+    "username": "jane_smith",
+    "email": "jane@example.com",
+    "actions": "edit/delete"
+  },
+  {
+    "username": "mike_jackson",
+    "email": "mike@example.com",
+    "actions": "edit/delete"
+  },
+  {
+    "username": "emma_watson",
+    "email": "emma@example.com",
+    "actions": "edit/delete"
+  },
+  {
+    "username": "alex_jones",
+    "email": "alex@example.com",
+    "actions": "edit/delete"
+  },
+  {
+    "username": "sarah_adams",
+    "email": "sarah@example.com",
+    "actions": "edit/delete"
+  },
+  {
+    "username": "chris_evans",
+    "email": "chris@example.com",
+    "actions": "edit/delete"
+  },
+  {
+    "username": "lisa_smith",
+    "email": "lisa@example.com",
+    "actions": "edit/delete"
+  },
+  {
+    "username": "ryan_gosling",
+    "email": "ryan@example.com",
+    "actions": "edit/delete"
+  },
+  {
+    "username": "amy_williams",
+    "email": "amy@example.com",
+    "actions": "edit/delete"
+  }
+]
