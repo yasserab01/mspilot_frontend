@@ -1,7 +1,6 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import { UserContext } from "contexts/UserContext";
 import { NavLink, useHistory } from "react-router-dom";
-// Chakra imports
 import {
   Box,
   Button,
@@ -17,9 +16,7 @@ import {
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
-// Custom components
 import DefaultAuth from "layouts/auth/Default";
-// Assets
 import illustration from "assets/img/auth/auth.png";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
@@ -27,8 +24,7 @@ import api from "../../../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "constants";
 
 function SignIn() {
-  const { setUser, fetchUser } = useContext(UserContext); // Get the setUser function from the UserContext
-  // Chakra color mode
+  const { setUser, fetchUser } = useContext(UserContext);
   const textColor = useColorModeValue("navy.700", "white");
   const textColorSecondary = "gray.400";
   const textColorBrand = useColorModeValue("brand.500", "white");
@@ -37,32 +33,30 @@ function SignIn() {
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
-  const history = useHistory(); // To handle navigation on successful login
-  const handleClick = () => setShow(!show);
+  const history = useHistory();
+
+  const toggleShowPassword = () => setShow(!show);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Validate the username and password
     if (!username || !password) {
       alert("Please fill in both username and password");
       setLoading(false);
       return;
     }
 
-    // Example POST request to backend for authentication
     try {
       const response = await api.post("/api/token/", { username, password });
       const data = response.data;
       if (response.status === 200) {
-        // Assuming the backend returns a success flag and a token
-        localStorage.setItem(ACCESS_TOKEN, data.access); // Store the token
-        localStorage.setItem(REFRESH_TOKEN, data.refresh); // Store the refresh token
-        await fetchUser(); // Fetch the user data
-        history.push('/dashboard'); // Navigate to the dashboard on success
+        localStorage.setItem(ACCESS_TOKEN, data.access);
+        localStorage.setItem(REFRESH_TOKEN, data.refresh);
+        await fetchUser();
+        history.push('/dashboard');
       } else {
-        alert(data.message); // Show error message
+        alert(data.message);
       }
     } catch (error) {
       console.error('Login Error:', error);
@@ -72,16 +66,8 @@ function SignIn() {
     }
   };
 
-  useEffect(() => {
-    let isMounted = true;
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   return (
-    <DefaultAuth illustrationBackground={illustration} image={illustration}>
+    <DefaultAuth illustrationBackground={illustration}>
       <Flex
         maxW={{ base: "100%", md: "max-content" }}
         w="100%"
@@ -132,15 +118,15 @@ function SignIn() {
               Username<Text color={brandStars}>*</Text>
             </FormLabel>
             <Input
-              isRequired={true}
+              isRequired
               variant="auth"
               fontSize="sm"
-              ms={{ base: "0px", md: "0px" }}
+              ms="0px"
               type="text"
               mb="24px"
               fontWeight="500"
               size="lg"
-              onChange={(e) => setUsername(e.target.value)} // Update the username state
+              onChange={(e) => setUsername(e.target.value)}
               value={username}
             />
             <FormLabel
@@ -154,14 +140,14 @@ function SignIn() {
             </FormLabel>
             <InputGroup size="md">
               <Input
-                isRequired={true}
+                isRequired
                 fontSize="sm"
                 placeholder="Min. 8 characters"
                 mb="24px"
                 size="lg"
                 type={show ? "text" : "password"}
                 variant="auth"
-                onChange={(e) => setPassword(e.target.value)} // Update the password state
+                onChange={(e) => setPassword(e.target.value)}
                 value={password}
               />
               <InputRightElement display="flex" alignItems="center" mt="4px">
@@ -169,7 +155,7 @@ function SignIn() {
                   color={textColorSecondary}
                   _hover={{ cursor: "pointer" }}
                   as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
-                  onClick={handleClick}
+                  onClick={toggleShowPassword}
                 />
               </InputRightElement>
             </InputGroup>
@@ -208,8 +194,8 @@ function SignIn() {
               w="100%"
               h="50"
               mb="24px"
-              onClick={handleSignIn} // Attach the handler to the button
-              isLoading={loading} // Disable button and show loading state
+              onClick={handleSignIn}
+              isLoading={loading}
             >
               Sign In
             </Button>

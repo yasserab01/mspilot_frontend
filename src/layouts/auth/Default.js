@@ -1,17 +1,13 @@
-// Chakra imports
-import { Box, Flex} from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
 import Footer from "components/footer/FooterAuth";
 import FixedPlugin from "components/fixedPlugin/FixedPlugin";
-// Custom components
 import { NavLink } from "react-router-dom";
 
-function AuthIllustration(props) {
-  const { children, illustrationBackground } = props;
-  // Chakra color mode
+function AuthIllustration({ children, illustrationBackground }) {
   return (
-    <Flex position='relative' h='max-content'>
+    <Flex position="relative" h="max-content">
       <Flex
         h={{
           sm: "initial",
@@ -19,39 +15,42 @@ function AuthIllustration(props) {
           lg: "100vh",
           xl: "97vh",
         }}
-        w='100%'
+        w="100%"
         maxW={{ md: "66%", lg: "1313px" }}
-        mx='auto'
+        mx="auto"
         pt={{ sm: "50px", md: "0px" }}
         px={{ lg: "30px", xl: "0px" }}
         ps={{ xl: "70px" }}
-        justifyContent='start'
-        direction='column'>
+        justifyContent="start"
+        direction="column"
+      >
         <NavLink
-          to='/admin'
-          style={() => ({
+          to="/admin"
+          style={{
             width: "fit-content",
             marginTop: "40px",
-          })}>
-        </NavLink>
+          }}
+        />
         {children}
         <Box
           display={{ base: "none", md: "block" }}
-          h='100%'
-          minH='100vh'
+          h="100%"
+          minH="100vh"
           w={{ lg: "50vw", "2xl": "44vw" }}
-          position='absolute'
-          right='0px'>
+          position="absolute"
+          right="0px"
+        >
           <Flex
             bg={`url(${illustrationBackground})`}
-            justify='center'
-            align='end'
-            w='100%'
-            h='100%'
-            bgSize='cover'
-            bgPosition='50%'
-            position='absolute'
-            borderBottomLeftRadius={{ lg: "120px", xl: "200px" }}></Flex>
+            justify="center"
+            align="end"
+            w="100%"
+            h="100%"
+            bgSize="cover"
+            bgPosition="50%"
+            position="absolute"
+            borderBottomLeftRadius={{ lg: "120px", xl: "200px" }}
+          ></Flex>
         </Box>
         <Footer />
       </Flex>
@@ -59,11 +58,10 @@ function AuthIllustration(props) {
     </Flex>
   );
 }
-// PROPS
 
 AuthIllustration.propTypes = {
-  illustrationBackground: PropTypes.string,
-  image: PropTypes.any,
+  illustrationBackground: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export default AuthIllustration;

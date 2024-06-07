@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 import api from 'api'; // Adjust the path to your actual API file
 import { ACCESS_TOKEN } from '../constants';
 
-export const UserContext = createContext();
+export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -18,8 +18,7 @@ export const UserProvider = ({ children }) => {
                     }
                 });
                 if (response.status === 200) {
-                    const data = response.data;
-                    setUser(data);
+                    setUser(response.data);
                 } else {
                     setUser(null);
                 }
@@ -27,8 +26,7 @@ export const UserProvider = ({ children }) => {
                 setUser(null);
                 console.error('Error fetching user data:', error);
             }
-        }
-        else {
+        } else {
             console.log('No token found');
         }
     }, []);
@@ -38,6 +36,7 @@ export const UserProvider = ({ children }) => {
         fetchUser().catch((error) => {
             if (isMounted) {
                 console.error(error);
+                setUser(null);
             }
         });
         return () => {

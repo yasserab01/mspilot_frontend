@@ -1,11 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 // Chakra imports
-import {
-  Box,
-  Flex,
-  Grid,
-} from "@chakra-ui/react";
+import { Box, Flex, Grid } from "@chakra-ui/react";
 
 // Custom components
 import TableRepositories from "views/admin/repositories/components/TableRepositories";
@@ -16,8 +12,7 @@ import { tableColumnsRepositories } from "views/admin/repositories/variables/tab
 
 import api from "api";
 
-export default function Repositories(props) {
-  const { searchQuery } = props;
+export default function Repositories({ searchQuery }) {
   const [repositories, setRepositories] = useState([]); // Initialize state to hold Repositories data
   const [refresh, setRefresh] = useState(false);
 
@@ -28,12 +23,14 @@ export default function Repositories(props) {
         setRepositories(response.data); // Update state with fetched data
         console.log(response.data); // Log the fetched data
       } catch (error) {
-        console.error("Failed to fetch Repositories:", error); // Error handling
+        console.error("Failed to fetch repositories:", error); // Error handling
       }
     };
 
     fetchRepositories();
-  }, [refresh]); // Empty dependency array means this effect runs once on mount
+  }, [refresh]);
+
+  const memoizedColumns = useMemo(() => tableColumnsRepositories, []);
 
   return (
     <Box pt={{ base: "180px", md: "80px", xl: "80px" }}>
@@ -42,7 +39,7 @@ export default function Repositories(props) {
           <Card px='0px' mb='20px'>
             <TableRepositories
               tableData={repositories} // Pass state data to TableRepositories component
-              columnsData={tableColumnsRepositories}
+              columnsData={memoizedColumns}
               refresh={setRefresh} // Pass state setter function to TableRepositories component
               searchQuery={searchQuery}
             />

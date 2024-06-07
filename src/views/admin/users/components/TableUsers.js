@@ -11,16 +11,16 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
   useGlobalFilter,
   usePagination,
   useSortBy,
   useTable,
 } from "react-table";
-import { useDisclosure } from '@chakra-ui/react';
 import api from "api";
 
 // Custom Modals
@@ -35,24 +35,23 @@ function TableUsers(props) {
   const data = useMemo(() => tableData, [tableData]);
 
   const [currentUser, setCurrentUser] = useState(null);
-  const [globalFilter, setGlobalFilter] = useState(searchQuery);
-
-  const handleEdit = (userData) => {
-    setCurrentUser(userData);
-    onUpdateOpen();
-  };
 
   const { isOpen, onOpen, onClose } = useDisclosure(); // For AddUserModal
   const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onClose: onUpdateClose } = useDisclosure(); // For UpdateUserModal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
 
-  const handleDeleteClick = (user) => {
+  const handleEdit = useCallback((userData) => {
+    setCurrentUser(userData);
+    onUpdateOpen();
+  }, [onUpdateOpen]);
+
+  const handleDeleteClick = useCallback((user) => {
     setUserToDelete(user);
     setIsDeleteModalOpen(true);
-  };
+  }, []);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     try {
       await api.delete(`/api/users/${userToDelete.id}/`);
       refresh(prev => !prev); // Assuming you have a function to refetch user data
@@ -62,10 +61,10 @@ function TableUsers(props) {
       console.error('Error deleting user:', error);
       // Optionally handle error, e.g., show an error message
     }
-  };
+  }, [userToDelete, refresh]);
 
   const tableInstance = useTable(
-    { columns, data, initialState: { globalFilter } },
+    { columns, data, initialState: { globalFilter: searchQuery } },
     useGlobalFilter,
     useSortBy,
     usePagination
@@ -153,7 +152,7 @@ function TableUsers(props) {
                           me="8px"
                           onError={({ currentTarget }) => {
                             currentTarget.onerror = null; // Prevents looping
-                            currentTarget.src="path/to/default/avatar.jpg"; // Fallback avatar
+                            currentTarget.src = "path/to/default/avatar.jpg"; // Fallback avatar
                           }}
                         />
                       ) : (

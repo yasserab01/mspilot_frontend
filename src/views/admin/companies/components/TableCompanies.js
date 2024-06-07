@@ -13,15 +13,9 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
-import React, { useEffect, useMemo } from "react";
-import {
-  useGlobalFilter,
-  usePagination,
-  useSortBy,
-  useTable,
-} from "react-table";
-import { useDisclosure } from '@chakra-ui/react' 
-import { useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { useGlobalFilter, usePagination, useSortBy, useTable } from "react-table";
+import { useDisclosure } from '@chakra-ui/react';
 import api from "api";
 
 // Custom Modals
@@ -29,43 +23,39 @@ import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
 import AddCompanyModal from "components/modals/companies/addCompanyModal";
 import UpdateCompanyModal from "components/modals/companies/updateCompanyModals";
 
-function TableUsers(props) {
+function TableCompanies(props) {
   const { columnsData, tableData, refresh, searchQuery } = props;
 
   const columns = useMemo(() => columnsData, [columnsData]);
   const data = useMemo(() => tableData, [tableData]);
 
   const [company, setCompany] = useState(null);
-
-  const handleEdit = (userData) => {
-    setCompany(userData);
-
-    onUpdateOpen();
-  };
-
-
-  const { isOpen, onOpen, onClose } = useDisclosure(); // For AddUserModal
-  const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onClose: onUpdateClose } = useDisclosure(); // For UpdateUserModal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
 
-  const handleDeleteClick = (user) => {
+  const { isOpen, onOpen, onClose } = useDisclosure(); // For AddCompanyModal
+  const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onClose: onUpdateClose } = useDisclosure(); // For UpdateCompanyModal
+
+  const handleEdit = useCallback((userData) => {
+    setCompany(userData);
+    onUpdateOpen();
+  }, [onUpdateOpen]);
+
+  const handleDeleteClick = useCallback((user) => {
     setUserToDelete(user);
     setIsDeleteModalOpen(true);
-  };
-  
-  const handleConfirmDelete = async () => {
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
     try {
       await api.delete(`/api/companies/${userToDelete.id}/`);
-      refresh(prev => !prev); // Assuming you have a function to refetch user data
+      refresh(prev => !prev);
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
     } catch (error) {
       console.error('Error deleting user:', error);
-      // Optionally handle error, e.g., show an error message
     }
-  };
-
+  }, [userToDelete, refresh]);
 
   const tableInstance = useTable(
     { columns, data },
@@ -85,25 +75,25 @@ function TableUsers(props) {
 
   useEffect(() => {
     setTableGlobalFilter(searchQuery || undefined);
-  }, [searchQuery]);
+  }, [searchQuery, setTableGlobalFilter]);
 
   const textColor = useColorModeValue("navy.700", "white");
 
   return (
     <>
-    
-    <AddCompanyModal isOpen={isOpen} onClose={onClose} refresher={refresh} />
-    <UpdateCompanyModal isOpen={isUpdateOpen} onClose={onUpdateClose} company={company} refresher={refresh} />
-    <DeleteConfirmationModal
-      isOpen={isDeleteModalOpen}
-      onClose={() => setIsDeleteModalOpen(false)}
-      onConfirm={handleConfirmDelete}
-      userName={userToDelete ? userToDelete.name : ''}
-    />
+      <AddCompanyModal isOpen={isOpen} onClose={onClose} refresher={refresh} />
+      <UpdateCompanyModal isOpen={isUpdateOpen} onClose={onUpdateClose} company={company} refresher={refresh} />
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        userName={userToDelete ? userToDelete.name : ''}
+      />
       <Flex
         direction="column"
         w="100%"
-        overflowX={{ sm: "scroll", lg: "hidden" }}>
+        overflowX={{ sm: "scroll", lg: "hidden" }}
+      >
         <Flex
           align={{ sm: "flex-start", lg: "center" }}
           justify="space-between"
@@ -111,12 +101,12 @@ function TableUsers(props) {
           px="22px"
           pb="20px"
           mb="10px"
-          boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)">
+          boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)"
+        >
           <Text color={textColor} fontSize="xl" fontWeight="600">
             Top Creators
           </Text>
           <Button onClick={onOpen} variant="action">Add New Company</Button>
-          
         </Flex>
         <Table {...getTableProps()} variant="simple" color="gray.500">
           <Thead>
@@ -127,12 +117,14 @@ function TableUsers(props) {
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     pe="10px"
                     key={index}
-                    borderColor="transparent">
+                    borderColor="transparent"
+                  >
                     <Flex
                       justify="space-between"
                       align="center"
                       fontSize={{ sm: "10px", lg: "12px" }}
-                      color="gray.400">
+                      color="gray.400"
+                    >
                       {column.render("Header")}
                     </Flex>
                   </Th>
@@ -147,7 +139,6 @@ function TableUsers(props) {
                 <Tr {...row.getRowProps()} key={index}>
                   {row.cells.map((cell, index) => {
                     let data = "";
-                    console.log(cell);
                     if (cell.column.Header === "Name") {
                       data = (
                         <Flex align="center">
@@ -160,7 +151,8 @@ function TableUsers(props) {
                           <Text
                             color={textColor}
                             fontSize="sm"
-                            fontWeight="600">
+                            fontWeight="600"
+                          >
                             {cell.value}
                           </Text>
                         </Flex>
@@ -190,7 +182,8 @@ function TableUsers(props) {
                         key={index}
                         fontSize={{ sm: "14px" }}
                         minW={{ sm: "150px", md: "200px", lg: "auto" }}
-                        borderColor="transparent">
+                        borderColor="transparent"
+                      >
                         {data}
                       </Td>
                     );
@@ -200,11 +193,9 @@ function TableUsers(props) {
             })}
           </Tbody>
         </Table>
-        
       </Flex>
-      
     </>
   );
 }
 
-export default TableUsers;
+export default TableCompanies;

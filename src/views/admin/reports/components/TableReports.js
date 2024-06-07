@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   Button,
   Flex,
@@ -27,7 +27,7 @@ import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
 import AddReportsModal from "components/modals/reports/addReportsModal";
 import UpdateReportsModal from "components/modals/reports/updateReportsModals";
 
-function TableReports({ columnsData, tableData, refresh, searchQuery}) {
+function TableReports({ columnsData, tableData, refresh, searchQuery }) {
   const columns = useMemo(() => columnsData, [columnsData]);
   const data = useMemo(() => tableData, [tableData]);
   const [companies, setCompanies] = useState([]);
@@ -89,28 +89,27 @@ function TableReports({ columnsData, tableData, refresh, searchQuery}) {
 
   const handleReportDownload = async (report) => {
     try {
-        const response = await api.post('http://127.0.0.1:8000/api/pdf-report/', {
-            report_id: report.id,
-            filename: `${report.name}.pdf`
-        }, { responseType: 'blob' });
+      const response = await api.post('/api/pdf-report/', {
+        report_id: report.id,
+        filename: `${report.name}.pdf`
+      }, { responseType: 'blob' });
 
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${report.name}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${report.name}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
-        console.error('Error downloading report:', error);
+      console.error('Error downloading report:', error);
     }
-};
-
+  };
 
   const handleConfirmDelete = async () => {
     try {
       await api.delete(`/api/reports/${reportToDelete.id}/`);
-      refresh(prev => !prev);  // Refreshing the data
+      refresh(prev => !prev);
       setIsDeleteModalOpen(false);
       setReportToDelete(null);
     } catch (error) {
@@ -118,15 +117,15 @@ function TableReports({ columnsData, tableData, refresh, searchQuery}) {
     }
   };
 
-  const getCompanyName = (companyId) => {
+  const getCompanyName = useCallback((companyId) => {
     const company = companies.find(c => c.id === companyId);
     return company ? company.name : 'Unknown';
-  };
+  }, [companies]);
 
-  const getRepositoryName = (repositoryId) => {
+  const getRepositoryName = useCallback((repositoryId) => {
     const repository = repositories.find(r => r.id === repositoryId);
     return repository ? repository.name : 'Unknown';
-  };
+  }, [repositories]);
 
   return (
     <>

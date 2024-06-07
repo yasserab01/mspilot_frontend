@@ -13,15 +13,14 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   useGlobalFilter,
   usePagination,
   useSortBy,
   useTable,
 } from "react-table";
-import { useDisclosure } from '@chakra-ui/react' 
-import { useState } from "react";
+import { useDisclosure } from "@chakra-ui/react";
 import api from "api";
 
 // Custom Modals
@@ -35,14 +34,12 @@ function TableSections(props) {
   const columns = useMemo(() => columnsData, [columnsData]);
   const data = useMemo(() => tableData, [tableData]);
 
-  const [Section, setSection] = useState(null);
+  const [section, setSection] = useState(null);
 
   const handleEdit = (sectionData) => {
     setSection(sectionData);
-
     onUpdateOpen();
   };
-
 
   const { isOpen, onOpen, onClose } = useDisclosure(); // For AddSectionModal
   const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onClose: onUpdateClose } = useDisclosure(); // For UpdateSectionModal
@@ -53,20 +50,19 @@ function TableSections(props) {
     setSectionToDelete(section);
     setIsDeleteModalOpen(true);
   };
-  
+
   const handleConfirmDelete = async () => {
     try {
       const response = await api.delete(`/api/sections/${sectionToDelete.id}/`);
       console.log('Delete response:', response);
-      refresh(prev => !prev); // Assuming you have a function to refetch section data
+      refresh((prev) => !prev); // Assuming you have a function to refetch section data
       setIsDeleteModalOpen(false);
       setSectionToDelete(null);
     } catch (error) {
-      console.error('Error deleting section:', error);
+      console.error("Error deleting section:", error);
       // Optionally handle error, e.g., show an error message
     }
   };
-
 
   const tableInstance = useTable(
     { columns, data },
@@ -86,25 +82,21 @@ function TableSections(props) {
 
   useEffect(() => {
     setTableGlobalFilter(searchQuery || undefined);
-  }, [searchQuery]);
+  }, [searchQuery, setTableGlobalFilter]);
 
   const textColor = useColorModeValue("navy.700", "white");
 
   return (
     <>
-    
-    <AddSectionModal isOpen={isOpen} onClose={onClose} refresher={refresh} />
-    <UpdateSectionModal isOpen={isUpdateOpen} onClose={onUpdateClose} section={Section} refresher={refresh} />
-    <DeleteConfirmationModal
-      isOpen={isDeleteModalOpen}
-      onClose={() => setIsDeleteModalOpen(false)}
-      onConfirm={handleConfirmDelete}
-      sectionName={sectionToDelete ? sectionToDelete.name : ''}
-    />
-      <Flex
-        direction="column"
-        w="100%"
-        overflowX={{ sm: "scroll", lg: "hidden" }}>
+      <AddSectionModal isOpen={isOpen} onClose={onClose} refresher={refresh} />
+      <UpdateSectionModal isOpen={isUpdateOpen} onClose={onUpdateClose} section={section} refresher={refresh} />
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        sectionName={sectionToDelete ? sectionToDelete.name : ""}
+      />
+      <Flex direction="column" w="100%" overflowX={{ sm: "scroll", lg: "hidden" }}>
         <Flex
           align={{ sm: "flex-start", lg: "center" }}
           justify="space-between"
@@ -112,14 +104,16 @@ function TableSections(props) {
           px="22px"
           pb="20px"
           mb="10px"
-          boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)">
+          boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)"
+        >
           <Text color={textColor} fontSize="xl" fontWeight="600">
-            Top Creators
+            Sections Management
           </Text>
-          <Button onClick={onOpen} variant="action">Add New Section</Button>
-          
+          <Button onClick={onOpen} variant="solid" colorScheme="blue">
+            Add New Section
+          </Button>
         </Flex>
-        <Table {...getTableProps()} variant="simple" color="gray.500">
+        <Table {...getTableProps()} variant="simple" colorScheme="gray">
           <Thead>
             {headerGroups.map((headerGroup, index) => (
               <Tr {...headerGroup.getHeaderGroupProps()} key={index}>
@@ -128,12 +122,9 @@ function TableSections(props) {
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     pe="10px"
                     key={index}
-                    borderColor="transparent">
-                    <Flex
-                      justify="space-between"
-                      align="center"
-                      fontSize={{ sm: "10px", lg: "12px" }}
-                      color="gray.400">
+                    borderColor="transparent"
+                  >
+                    <Flex justify="space-between" align="center" fontSize={{ sm: "10px", lg: "12px" }} color="gray.400">
                       {column.render("Header")}
                     </Flex>
                   </Th>
@@ -148,20 +139,11 @@ function TableSections(props) {
                 <Tr {...row.getRowProps()} key={index}>
                   {row.cells.map((cell, index) => {
                     let data = "";
-                    console.log(cell);
                     if (cell.column.Header === "Section") {
                       data = (
                         <Flex align="center">
-                          <Avatar
-                            src={cell.value[1]}
-                            w="30px"
-                            h="30px"
-                            me="8px"
-                          />
-                          <Text
-                            color={textColor}
-                            fontSize="sm"
-                            fontWeight="600">
+                          <Avatar src={cell.value[1]} w="30px" h="30px" me="8px" />
+                          <Text color={textColor} fontSize="sm" fontWeight="600">
                             {cell.value}
                           </Text>
                         </Flex>
@@ -191,7 +173,8 @@ function TableSections(props) {
                         key={index}
                         fontSize={{ sm: "14px" }}
                         minW={{ sm: "150px", md: "200px", lg: "auto" }}
-                        borderColor="transparent">
+                        borderColor="transparent"
+                      >
                         {data}
                       </Td>
                     );
@@ -201,9 +184,7 @@ function TableSections(props) {
             })}
           </Tbody>
         </Table>
-        
       </Flex>
-      
     </>
   );
 }

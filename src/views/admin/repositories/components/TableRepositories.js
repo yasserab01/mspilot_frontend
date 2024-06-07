@@ -1,3 +1,4 @@
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Avatar,
   Button,
@@ -11,17 +12,10 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  useDisclosure
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
-import React, { useEffect, useMemo } from "react";
-import {
-  useGlobalFilter,
-  usePagination,
-  useSortBy,
-  useTable,
-} from "react-table";
-import { useDisclosure } from '@chakra-ui/react' 
-import { useState } from "react";
+import { useGlobalFilter, usePagination, useSortBy, useTable } from "react-table";
 import api from "api";
 
 // Custom Modals
@@ -29,12 +23,10 @@ import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
 import AddRepositoriesModal from "components/modals/repositories/addRepositoriesModal";
 import UpdateRepositoriesModal from "components/modals/repositories/updateRepositoriesModals";
 
-function TableRepositories(props) {
-  const { columnsData, tableData, refresh, searchQuery } = props;
-
+function TableRepositories({ columnsData, tableData, refresh, searchQuery }) {
   const columns = useMemo(() => columnsData, [columnsData]);
   const data = useMemo(() => tableData, [tableData]);
-  const [repositories, setRepositories] = useState(null);
+  const [selectedRepository, setSelectedRepository] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure(); // For AddRepositoryModal
   const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onClose: onUpdateClose } = useDisclosure(); // For UpdateUserModal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -59,50 +51,41 @@ function TableRepositories(props) {
   const textColor = useColorModeValue("navy.700", "white");
 
   const handleEdit = (repositoryData) => {
-    console.log(repositoryData);
-    setRepositories(repositoryData.original);
-
+    setSelectedRepository(repositoryData.original);
     onUpdateOpen();
   };
 
-  const handleDeleteClick = (Repository) => {
-    setRepositoryToDelete(Repository);
+  const handleDeleteClick = (repository) => {
+    setRepositoryToDelete(repository);
     setIsDeleteModalOpen(true);
   };
   
   const handleConfirmDelete = async () => {
     try {
       await api.delete(`/api/repositories/${repositoryToDelete.id}/`);
-      refresh(prev => !prev); // Assuming you have a function to refetch Repository data
+      refresh(prev => !prev); // Refresh the repository data
       setIsDeleteModalOpen(false);
       setRepositoryToDelete(null);
     } catch (error) {
-      console.error('Error deleting Repository:', error);
-      // Optionally handle error, e.g., show an error message
+      console.error('Error deleting repository:', error);
     }
   };
 
   useEffect(() => {
     setTableGlobalFilter(searchQuery || undefined);
-  }, [searchQuery]);
-
-  
+  }, [searchQuery, setTableGlobalFilter]);
 
   return (
     <>
-    
-    <AddRepositoriesModal isOpen={isOpen} onClose={onClose} refresher={refresh} />
-    <UpdateRepositoriesModal isOpen={isUpdateOpen} onClose={onUpdateClose} repository={repositories} refresher={refresh} />
-    <DeleteConfirmationModal
-      isOpen={isDeleteModalOpen}
-      onClose={() => setIsDeleteModalOpen(false)}
-      onConfirm={handleConfirmDelete}
-      RepositoryName={repositoryToDelete ? repositoryToDelete.name : ''}
-    />
-      <Flex
-        direction="column"
-        w="100%"
-        overflowX={{ sm: "scroll", lg: "hidden" }}>
+      <AddRepositoriesModal isOpen={isOpen} onClose={onClose} refresher={refresh} />
+      <UpdateRepositoriesModal isOpen={isUpdateOpen} onClose={onUpdateClose} repository={selectedRepository} refresher={refresh} />
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        repositoryName={repositoryToDelete ? repositoryToDelete.name : ''}
+      />
+      <Flex direction="column" w="100%" overflowX={{ sm: "scroll", lg: "hidden" }}>
         <Flex
           align={{ sm: "flex-start", lg: "center" }}
           justify="space-between"
@@ -112,10 +95,9 @@ function TableRepositories(props) {
           mb="10px"
           boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)">
           <Text color={textColor} fontSize="xl" fontWeight="600">
-            Top Creators
+            Repositories
           </Text>
-          <Button onClick={onOpen} variant="action">Add New Repositories</Button>
-          
+          <Button onClick={onOpen} variant="action">Add New Repository</Button>
         </Flex>
         <Table {...getTableProps()} variant="simple" color="gray.500">
           <Thead>
@@ -145,8 +127,7 @@ function TableRepositories(props) {
               return (
                 <Tr {...row.getRowProps()} key={index}>
                   {row.cells.map((cell, index) => {
-                    let data = "";
-                    console.log(cell);
+                    let data = cell.render('Cell');
                     if (cell.column.Header === "Repository Name") {
                       data = (
                         <Flex align="center">
@@ -156,10 +137,7 @@ function TableRepositories(props) {
                             h="30px"
                             me="8px"
                           />
-                          <Text
-                            color={textColor}
-                            fontSize="sm"
-                            fontWeight="600">
+                          <Text color={textColor} fontSize="sm" fontWeight="600">
                             {cell.value}
                           </Text>
                         </Flex>
@@ -199,9 +177,7 @@ function TableRepositories(props) {
             })}
           </Tbody>
         </Table>
-        
       </Flex>
-      
     </>
   );
 }
