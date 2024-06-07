@@ -13,7 +13,7 @@ import {
   Input
 } from "@chakra-ui/react";
 
-import SelectSections from './SelectSections';
+import SelectSections from '../sections/SelectSections';
 
 import api from 'api'; // Import API configuration for HTTP requests
 

@@ -26,8 +26,8 @@ import api from "api";
 
 // Custom Modals
 import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
-import AddSectionModal from "components/modals/addSectionModal";
-import UpdateSectionModal from "components/modals/updateSectionModals";
+import AddSectionModal from "components/modals/sections/addSectionModal";
+import UpdateSectionModal from "components/modals/sections/updateSectionModals";
 
 function TableSections(props) {
   const { columnsData, tableData, refresh, searchQuery } = props;

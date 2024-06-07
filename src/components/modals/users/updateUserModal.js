@@ -12,16 +12,18 @@ import {
   FormLabel,
   Input,
   Image,
-  Flex
+  Flex,
+  Spinner
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import api from 'api';
 
 function UpdateUserModal({ isOpen, onClose, user, refresher }) {
   const fileInputRef = useRef(null);
-  const [imagePreview, setImagePreview] = useState(user?.photo || 'https://bit.ly/dan-abramov');
+  const [imagePreview, setImagePreview] = useState('https://bit.ly/dan-abramov');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
@@ -31,18 +33,11 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
     setEmail(e.target.value);
   };
 
-  // Update state when user prop changes
   useEffect(() => {
     if (user) {
       setUsername(user.username || '');
       setEmail(user.email || '');
-      if(user.profile){
-        setImagePreview(user.profile.picture || 'https://bit.ly/dan-abramov');
-      }
-      else{
-        setImagePreview('https://bit.ly/dan-abramov');
-      }
-
+      setImagePreview(user.profile?.picture || 'https://bit.ly/dan-abramov');
     }
   }, [user]);
 
@@ -57,9 +52,8 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
     }
   };
 
-  
-
   const handleSubmit = async () => {
+    setIsLoading(true);
     try {
       const user_id = user.id;
       const formData = new FormData();
@@ -67,23 +61,22 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
       formData.append('email', email);
       if (fileInputRef.current?.files[0]) {
         formData.append('photo', fileInputRef.current.files[0]);
-        const Upload = await api.post(`/api/users/${user_id}/upload-picture/`, {picture: fileInputRef.current.files[0]},
-          {headers: {
-            'Content-Type': 'multipart/form-data'
-          }}
+        const Upload = await api.post(`/api/users/${user_id}/upload-picture/`, 
+          { picture: fileInputRef.current.files[0] },
+          { headers: { 'Content-Type': 'multipart/form-data' } }
         );
-        console.log(Upload.data); // Log the response from the server
+        console.log(Upload.data);
       }
-      console.log(fileInputRef.current.files[0]);  
       const response = await api.put(`/api/users/${user_id}/`, formData);
-      console.log(response); // Log the response from the server
-      onClose(); // Close the modal on successful save
-      refresher((prev) => !prev); // Trigger a re-fetch of the data
+      console.log(response);
+      onClose();
+      refresher((prev) => !prev);
     } catch (error) {
       console.error('Error saving user:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
-  
 
   const openFileSelector = () => {
     fileInputRef.current.click();
@@ -108,9 +101,9 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
         <ModalBody>
           <FormControl>
             <FormLabel>Username</FormLabel>
-            <Input placeholder="Username" value={username} onChange={handleUsernameChange}  />
+            <Input placeholder="Username" value={username} onChange={handleUsernameChange} />
             <FormLabel mt={4}>Email</FormLabel>
-            <Input placeholder="Email" value={email} onChange={handleEmailChange}  />
+            <Input placeholder="Email" value={email} onChange={handleEmailChange} />
             <FormLabel mt={4}>Photo</FormLabel>
             <Input
               type="file"
@@ -124,7 +117,9 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
           </FormControl>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleSubmit}>Save</Button>
+          <Button colorScheme="blue" mr={3} onClick={handleSubmit} isLoading={isLoading}>
+            {isLoading ? <Spinner size="sm" /> : 'Save'}
+          </Button>
           <Button onClick={onClose}>Cancel</Button>
         </ModalFooter>
       </ModalContent>

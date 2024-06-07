@@ -1,6 +1,7 @@
 import React from "react";
 import { Flex, Image, useColorMode } from "@chakra-ui/react";
 import { HSeparator } from "components/separator/Separator";
+import PropTypes from "prop-types";
 
 // Logos
 import lightLogo from 'assets/img/logo-black.png';
@@ -17,5 +18,9 @@ export function SidebarBrand() {
     </Flex>
   );
 }
+
+SidebarBrand.propTypes = {
+  colorMode: PropTypes.oneOf(['light', 'dark']),
+};
 
 export default SidebarBrand;

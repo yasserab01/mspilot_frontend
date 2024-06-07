@@ -26,8 +26,8 @@ import api from "api";
 
 // Custom Modals
 import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
-import AddRepositoriesModal from "components/modals/addRepositoriesModal";
-import UpdateRepositoriesModal from "components/modals/updateRepositoriesModals";
+import AddRepositoriesModal from "components/modals/repositories/addRepositoriesModal";
+import UpdateRepositoriesModal from "components/modals/repositories/updateRepositoriesModals";
 
 function TableRepositories(props) {
   const { columnsData, tableData, refresh, searchQuery } = props;

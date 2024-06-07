@@ -1,6 +1,6 @@
 {
-  "homepage": "https://horizon-ui.com/horizon-ui-chakra",
-  "name": "horizon-ui-chakra",
+  "homepage": "https://mspilot.com",
+  "name": "mspilot",
   "version": "1.0.1",
   "private": true,
   "dependencies": {
@@ -45,7 +45,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false && react-scripts --max_old_space_size=4096 build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "yarn run build",
@@ -74,10 +74,10 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^3.2.3",
-     "@babel/core": "7.22.5",
-     "@babel/eslint-parser": "7.22.5",
-     "@babel/plugin-proposal-private-property-in-object": "7.21.11",
-     "@babel/preset-env": "7.22.5"
+    "@babel/core": "7.22.5",
+    "@babel/eslint-parser": "7.22.5",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/preset-env": "7.22.5",
+    "gh-pages": "^3.2.3"
   }
 }

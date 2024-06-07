@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   IconButton,
   Input,
@@ -7,19 +7,39 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
+import debounce from "lodash.debounce";
 
-export function SearchBar({ variant, background, placeholder = "Search...", borderRadius = "30px", onSearch, value, ...rest }) {
+export function SearchBar({
+  variant,
+  background,
+  placeholder = "Search...",
+  borderRadius = "30px",
+  onSearch,
+  value,
+  ...rest
+}) {
   // Chakra Color Mode
   const searchIconColor = useColorModeValue("gray.700", "white");
   const inputBg = useColorModeValue("secondaryGray.300", "navy.900");
   const inputText = useColorModeValue("gray.700", "gray.100");
 
   // State to store the search query
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(value || "");
+
+  // Debounced search function
+  const debouncedSearch = useMemo(
+    () => debounce((searchQuery) => {
+      if (onSearch) {
+        onSearch(searchQuery);
+      }
+    }, 300),
+    [onSearch]
+  );
 
   // Handle input change
   const handleInputChange = (e) => {
     setQuery(e.target.value);
+    debouncedSearch(e.target.value);
   };
 
   // Handle form submission
@@ -29,6 +49,20 @@ export function SearchBar({ variant, background, placeholder = "Search...", bord
       onSearch(query);
     }
   };
+
+  // Cleanup debounced function on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  // Update the query if the value prop changes
+  useEffect(() => {
+    if (value !== undefined) {
+      setQuery(value);
+    }
+  }, [value]);
 
   return (
     <form onSubmit={handleSearch}>

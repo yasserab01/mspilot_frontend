@@ -13,7 +13,7 @@ import {
   Input,
 } from "@chakra-ui/react";
 import api from 'api';
-import SelectSections from './SelectSections';
+import SelectSections from '../sections/SelectSections';
 
 function UpdateRepositoryModal({ isOpen, onClose, repository, refresher }) {
   const [name, setName] = useState('');

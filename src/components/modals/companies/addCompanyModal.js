@@ -16,14 +16,15 @@ import {
 import api from 'api';
 
 function AddCompanyModal({ isOpen, onClose, refresher}) {
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState('');
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'name') setName(value);
+    setName(e.target.value);
   };
 
   const handleSave = async () => {
+    setIsLoading(true);
     try {
       const response = await api.post('/api/companies/', {
         name,
@@ -33,6 +34,9 @@ function AddCompanyModal({ isOpen, onClose, refresher}) {
       refresher((prev)=>!prev); // Refresh the data in the parent component
     } catch (error) {
       console.error('Error saving user:', error);
+    }
+    finally {
+      setIsLoading(false);
     }
   }
 
@@ -49,7 +53,7 @@ function AddCompanyModal({ isOpen, onClose, refresher}) {
           </FormControl>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="blue" onClick={handleSave} mr={3}>Save</Button>
+          <Button colorScheme="blue" onClick={handleSave} mr={3} isLoading={isLoading} >Save</Button>
           <Button onClick={onClose}>Cancel</Button>
         </ModalFooter>
       </ModalContent>

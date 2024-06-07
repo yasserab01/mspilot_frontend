@@ -24,8 +24,8 @@ import { useDisclosure } from '@chakra-ui/react';
 import api from "api";
 
 // Custom Modals
-import AddUserModal from "components/modals/addUserModal";
-import UpdateUserModal from "components/modals/updateUserModal";
+import AddUserModal from "components/modals/users/addUserModal";
+import UpdateUserModal from "components/modals/users/updateUserModal";
 import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
 
 function TableUsers(props) {

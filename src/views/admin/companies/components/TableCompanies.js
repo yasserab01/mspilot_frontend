@@ -26,8 +26,8 @@ import api from "api";
 
 // Custom Modals
 import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
-import AddCompanyModal from "components/modals/addCompanyModal";
-import UpdateCompanyModal from "components/modals/updateCompanyModals";
+import AddCompanyModal from "components/modals/companies/addCompanyModal";
+import UpdateCompanyModal from "components/modals/companies/updateCompanyModals";
 
 function TableUsers(props) {
   const { columnsData, tableData, refresh, searchQuery } = props;

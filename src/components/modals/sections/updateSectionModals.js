@@ -12,7 +12,7 @@ import {
   FormLabel,
   Input,
   IconButton,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import { DeleteIcon, AddIcon } from "@chakra-ui/icons";
 import api from 'api';
@@ -20,6 +20,7 @@ import api from 'api';
 function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
   const [name, setName] = useState('');
   const [subsections, setSubsections] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getSubsections = async (section) => {
     if (section) {
@@ -58,6 +59,7 @@ function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
   };
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     try {
       const section_id = section.id;
       const response = await api.put(`/api/sections/${section_id}/update-subsections/`, {
@@ -70,6 +72,8 @@ function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
       refresher((prev) => !prev); // Trigger a re-fetch of the data
     } catch (error) {
       console.error('Error updating section:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -110,7 +114,7 @@ function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
           </VStack>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleSubmit}>Save</Button>
+          <Button colorScheme="blue" mr={3} onClick={handleSubmit} isLoading={isLoading}>Save</Button>
           <Button onClick={onClose}>Cancel</Button>
         </ModalFooter>
       </ModalContent>

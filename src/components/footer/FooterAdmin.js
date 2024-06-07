@@ -1,4 +1,3 @@
-/*eslint-disable*/
 import React from "react";
 import {
   Flex,
@@ -6,14 +5,12 @@ import {
   List,
   ListItem,
   Text,
-  Button,
-  useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
 
 export default function Footer() {
   const textColor = useColorModeValue("gray.400", "white");
-  const { toggleColorMode } = useColorMode();
+
   return (
     <Flex
       zIndex='3'
@@ -36,7 +33,7 @@ export default function Footer() {
         }}
         mb={{ base: "20px", xl: "0px" }}>
         {" "}
-        &copy; {1900 + new Date().getYear()}
+        &copy; {new Date().getFullYear()}
         <Text as='span' fontWeight='500' ms='4px'>
           Horizon UI. All Rights Reserved. Made with love by
           <Link

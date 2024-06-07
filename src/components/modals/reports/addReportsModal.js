@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -19,7 +19,8 @@ import {
   Tr,
   Th,
   Td,
-  Box
+  Box,
+  Spinner
 } from "@chakra-ui/react";
 import api from 'api';
 
@@ -30,10 +31,13 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
   const [selectedRepository, setSelectedRepository] = useState('');
   const [sections, setSections] = useState([]);
   const [subsectionsStatus, setSubsectionsStatus] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
-    async function fetchCompaniesAndRepositories() {
+    const fetchCompaniesAndRepositories = async () => {
       try {
+        setIsFetching(true);
         const [companyRes, repoRes] = await Promise.all([
           api.get('/api/companies/'),
           api.get('/api/repositories/')
@@ -42,6 +46,8 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
         setRepositories(repoRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setIsFetching(false);
       }
     }
 
@@ -57,39 +63,45 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
     setSelectedRepository(repoId);
 
     try {
+      setIsFetching(true);
       const { data } = await api.get(`/api/repositories/${repoId}/`);
-      let sections = [];
-      for (const sectionId of data.sections) {
-        const sectionData = await api.get(`/api/sections/${sectionId}/`);
-        sections.push(sectionData.data);
-      }
-      setSections(sections);
-      console.log('Sections:', sections);
-      initializeSubsectionStates(data.sections);
+      const sectionsData = await Promise.all(
+        data.sections.map(sectionId => api.get(`/api/sections/${sectionId}/`))
+      );
+      setSections(sectionsData.map(sectionRes => sectionRes.data));
+      await initializeSubsectionStates(data.sections);
     } catch (error) {
       console.error('Error fetching sections:', error);
+    } finally {
+      setIsFetching(false);
     }
   };
 
   const initializeSubsectionStates = async (sectionsId) => {
     const subsections = {};
-    for (const sectionId of sectionsId) {
-      const { data } = await api.get(`/api/sections/${sectionId}/subsections/`);
-      for (const subsection of data) {
-        subsections[subsection.id] = {
-          sectionId: sectionId,
-          subsectionId: subsection.id,
-          subsectionName: subsection.name,
-          status: 'applicable',
-          justification: ''
-        };
-      }
+    try {
+      const subsectionsData = await Promise.all(
+        sectionsId.map(sectionId => api.get(`/api/sections/${sectionId}/subsections/`))
+      );
+      subsectionsData.forEach(({ data }, index) => {
+        data.forEach(subsection => {
+          subsections[subsection.id] = {
+            sectionId: sectionsId[index],
+            subsectionId: subsection.id,
+            subsectionName: subsection.name,
+            status: 'applicable',
+            justification: ''
+          };
+        });
+      });
+      setSubsectionsStatus(subsections);
+      console.log('Subsections:', subsections);
+    } catch (error) {
+      console.error('Error fetching subsections:', error);
     }
-    setSubsectionsStatus(subsections);
-    console.log('Subsections:', subsections);
   };
 
-  const handleStatusChange = (subsectionId, value) => {
+  const handleStatusChange = useCallback((subsectionId, value) => {
     setSubsectionsStatus(prev => ({
       ...prev,
       [subsectionId]: {
@@ -97,9 +109,9 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
         status: value
       }
     }));
-  };
+  }, []);
 
-  const handleJustificationChange = (subsectionId, value) => {
+  const handleJustificationChange = useCallback((subsectionId, value) => {
     setSubsectionsStatus(prev => ({
       ...prev,
       [subsectionId]: {
@@ -107,10 +119,11 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
         justification: value
       }
     }));
-  };
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsLoading(true);
     const reportData = {
       company: selectedCompany,
       repository: selectedRepository,
@@ -141,6 +154,8 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
       }
     } catch (error) {
       console.error('Error submitting form:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -151,60 +166,65 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
         <ModalHeader>Add New Report</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FormControl>
-            <FormLabel>Company</FormLabel>
-            <Select placeholder="Select company" onChange={handleCompanyChange}>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>{company.name}</option>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl mt={4}>
-            <FormLabel>Repository</FormLabel>
-            <Select placeholder="Select repository" onChange={handleRepositoryChange}>
-              {repositories.map((repo) => (
-                <option key={repo.id} value={repo.id}>{repo.name}</option>
-              ))}
-            </Select>
-          </FormControl>
-
-          {sections.map((section) => (
-            <Box key={section.id}>
-              <Text fontSize="lg" fontWeight="bold" mt={4}>{section.name}</Text>
-              <Table size="sm">
-                <Thead>
-                  <Tr>
-                    <Th>Subsection Id</Th>
-                    <Th>Subsection</Th>
-                    <Th>Status</Th>
-                    <Th>Justification</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {Object.entries(subsectionsStatus)
-                    .filter(([_, subsection]) => subsection.sectionId === section.id)
-                    .map(([subsectionId, { subsectionName, status, justification }]) => (
-                      <Tr key={subsectionId}>
-                        <Td>{section.id+"-"+subsectionId}</Td>
-                        <Td>{subsectionName}</Td>
-                        <Td>
-                          <Select value={status} onChange={(e) => handleStatusChange(subsectionId, e.target.value)}>
-                            <option value="applicable">Applicable</option>
-                            <option value="not_applicable">Not Applicable</option>
-                          </Select>
-                        </Td>
-                        <Td>
-                          <Textarea value={justification} onChange={(e) => handleJustificationChange(subsectionId, e.target.value)} />
-                        </Td>
+          {isFetching ? (
+            <Spinner size="xl" />
+          ) : (
+            <>
+              <FormControl>
+                <FormLabel>Company</FormLabel>
+                <Select placeholder="Select company" value={selectedCompany} onChange={handleCompanyChange}>
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>{company.name}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Repository</FormLabel>
+                <Select placeholder="Select repository" value={selectedRepository} onChange={handleRepositoryChange}>
+                  {repositories.map((repo) => (
+                    <option key={repo.id} value={repo.id}>{repo.name}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              {sections.map((section) => (
+                <Box key={section.id}>
+                  <Text fontSize="lg" fontWeight="bold" mt={4}>{section.name}</Text>
+                  <Table size="sm">
+                    <Thead>
+                      <Tr>
+                        <Th>Subsection Id</Th>
+                        <Th>Subsection</Th>
+                        <Th>Status</Th>
+                        <Th>Justification</Th>
                       </Tr>
-                    ))}
-                </Tbody>
-              </Table>
-            </Box>
-          ))}
+                    </Thead>
+                    <Tbody>
+                      {Object.entries(subsectionsStatus)
+                        .filter(([_, subsection]) => subsection.sectionId === section.id)
+                        .map(([subsectionId, { subsectionName, status, justification }]) => (
+                          <Tr key={subsectionId}>
+                            <Td>{section.id + "-" + subsectionId}</Td>
+                            <Td>{subsectionName}</Td>
+                            <Td>
+                              <Select value={status} onChange={(e) => handleStatusChange(subsectionId, e.target.value)}>
+                                <option value="applicable">Applicable</option>
+                                <option value="not_applicable">Not Applicable</option>
+                              </Select>
+                            </Td>
+                            <Td>
+                              <Textarea value={justification} onChange={(e) => handleJustificationChange(subsectionId, e.target.value)} />
+                            </Td>
+                          </Tr>
+                        ))}
+                    </Tbody>
+                  </Table>
+                </Box>
+              ))}
+            </>
+          )}
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleSubmit}>Save</Button>
+          <Button colorScheme="blue" mr={3} onClick={handleSubmit} isLoading={isLoading}>Save</Button>
           <Button onClick={onClose}>Cancel</Button>
         </ModalFooter>
       </ModalContent>

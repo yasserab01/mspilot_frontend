@@ -7,7 +7,6 @@ import {
   MdCategory,
   MdFolder,
   MdAssessment,
-  MdLogin,
 } from "react-icons/md";
 
 // Admin Imports

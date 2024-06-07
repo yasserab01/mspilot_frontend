@@ -27,10 +27,9 @@ const logout = async () => {
     }
 };
 
-export default function HeaderLinks(props) {
-    const { secondary, searchQuery, handleSearch  } = props;
+export default function HeaderLinks({ secondary, searchQuery, handleSearch }) {
     const { user } = useContext(UserContext);
-    
+
     const navbarIcon = useColorModeValue('gray.400', 'white');
     const menuBg = useColorModeValue('white', 'navy.800');
     const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -63,7 +62,6 @@ export default function HeaderLinks(props) {
             <Flex alignItems="center" mx="10px">
                 <ThemeEditor navbarIcon={navbarIcon} />
             </Flex>
-            
             <Menu>
                 <MenuButton p="0px">
                     <Avatar
@@ -73,7 +71,7 @@ export default function HeaderLinks(props) {
                         size="sm"
                         w="40px"
                         h="40px"
-                        src={user && user.profile && user.profile.picture ? user.profile.picture : ''}
+                        src={user?.profile?.picture || ''}
                     />
                 </MenuButton>
                 <MenuList
@@ -96,7 +94,7 @@ export default function HeaderLinks(props) {
                             fontWeight="700"
                             color={textColor}
                         >
-                            👋&nbsp; Hey, {user ? user.username : 'Guest'}
+                            👋&nbsp; Hey, {user?.username || 'Guest'}
                         </Text>
                     </Flex>
                     <Flex flexDirection="column" p="10px">
@@ -118,8 +116,7 @@ export default function HeaderLinks(props) {
 }
 
 HeaderLinks.propTypes = {
-    variant: PropTypes.string,
-    fixed: PropTypes.bool,
     secondary: PropTypes.bool,
-    onOpen: PropTypes.func
+    searchQuery: PropTypes.string,
+    handleSearch: PropTypes.func
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -33,100 +33,133 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
   const [sections, setSections] = useState([]);
   const [subsectionsStatus, setSubsectionsStatus] = useState({});
 
-  useEffect(() => {
-    if (isOpen && reportSelected) {
-      console.log('Modal is open, and reportSelected is provided:', reportSelected);
-      fetchInitialData();
-    }
-  }, [isOpen, reportSelected]); // Listen to isOpen as well to trigger fetching when the modal opens
-
-  async function fetchInitialData() {
+  const fetchSections = useCallback(async (sectionsId) => {
     try {
-      const [companyRes,allCompanies, repositoryRes, allRepositories, reportRes] = await Promise.all([
+      const sectionsData = await Promise.all(
+        sectionsId.map(sectionId => api.get(`/api/sections/${sectionId}/`))
+      );
+      setSections(sectionsData.map(sectionRes => sectionRes.data));
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+    }
+  }, []);
+
+  const initializeSubsectionStates = useCallback(async (sectionsId) => {
+    try {
+      const subsections = {};
+      const subsectionsDataArray = await Promise.all(
+        sectionsId.map(sectionId => api.get(`/api/sections/${sectionId}/subsections/`))
+      );
+      const subsectionsStatusData = await api.get(`/api/reports/${reportSelected.id}/subsections-status/`);
+
+      subsectionsDataArray.forEach((subsectionsData, index) => {
+        subsectionsData.data.forEach(subsection => {
+          const subsectionStatus = subsectionsStatusData.data.find(status => status.subsection === subsection.id) || {};
+
+          subsections[subsection.id] = {
+            sectionId: sectionsId[index],
+            subsectionStatusId: subsectionStatus.id || null,
+            subsectionId: subsection.id,
+            subsectionName: subsection.name,
+            status: subsectionStatus.status || 'applicable',
+            justification: subsectionStatus.justification || ''
+          };
+        });
+      });
+      setSubsectionsStatus(subsections);
+    } catch (error) {
+      console.error('Error initializing subsection states:', error);
+    }
+  }, [reportSelected?.id]);
+
+  const fetchInitialData = useCallback(async () => {
+    if (!reportSelected) return;
+
+    try {
+      const [companyRes, allCompanies, repositoryRes, allRepositories, reportRes] = await Promise.all([
         api.get(`/api/companies/${reportSelected.company}/`),
-        api.get(`/api/companies/`), // Assuming you fetch all companies
+        api.get(`/api/companies/`),
         api.get(`/api/repositories/${reportSelected.repository}/`),
-        api.get(`/api/repositories/`), // Assuming you fetch all repositories
-        api.get(`/api/reports/${reportSelected.id}/`), // Assuming there is a direct call to fetch the report // Assuming you fetch all sections of a repository
+        api.get(`/api/repositories/`),
+        api.get(`/api/reports/${reportSelected.id}/`),
       ]);
-      setSelectedCompany(companyRes.data.id);
-      setCompanies(allCompanies.data); // Assuming you fetch single company data
-      setSelectedRepository([repositoryRes.data]); // Assuming single repository data
-      setRepositories(allRepositories.data); // Assuming you fetch all repositories
-      setReport(reportRes.data);
+
+      setSelectedCompany(companyRes.data?.id || '');
+      setCompanies(allCompanies.data || []);
+      setSelectedRepository(repositoryRes.data?.id || '');
+      setRepositories(allRepositories.data || []);
+      setReport(reportRes.data || {});
+
       await fetchSections(repositoryRes.data.sections);
-      initializeSubsectionStates(repositoryRes.data.sections);
-      setSelectedCompany(reportSelected.company);
-      setSelectedRepository(reportSelected.repository);
+      await initializeSubsectionStates(repositoryRes.data.sections);
 
     } catch (error) {
       console.error('Error fetching initial data:', error);
     }
-  }
+  }, [fetchSections, initializeSubsectionStates, reportSelected]);
 
-  async function fetchSections(sectionsId) {
-    try {
-      const sections = [];
-      for(const sectionId of sectionsId) {
-        const { data } = await api.get(`/api/sections/${sectionId}/`);
-        sections.push(data);
-      }
-      setSections(sections);
-      console.log('Sections:', sections);
-    } catch (error) {
-      console.error('Error fetching sections:', error);
+  useEffect(() => {
+    if (isOpen && reportSelected) {
+      fetchInitialData();
     }
-  }
+  }, [isOpen, reportSelected, fetchInitialData]);
 
-  const handleCompanyChange = (e) => {
+  const handleCompanyChange = useCallback((e) => {
     setSelectedCompany(e.target.value);
-  };
+  }, []);
 
-  const handleRepositoryChange = async (e) => {
+  const handleRepositoryChange = useCallback(async (e) => {
     const repoId = e.target.value;
     setSelectedRepository(repoId);
 
     try {
       const { data } = await api.get(`/api/repositories/${repoId}/`);
-      let sections = [];
-      for (const sectionId of data.sections) {
-        const sectionData = await api.get(`/api/sections/${sectionId}/`);
-        sections.push(sectionData.data);
-      }
-      setSections(sections);
-      console.log('Sections:', sections);
-      initializeSubsectionStates(data.sections);
+      await fetchSections(data.sections);
+      await initializeSubsectionStates(data.sections);
     } catch (error) {
       console.error('Error fetching sections:', error);
     }
-  };
+  }, [fetchSections, initializeSubsectionStates]);
+
+  const handleStatusChange = useCallback((subsectionId, value) => {
+    setSubsectionsStatus(prev => ({
+      ...prev,
+      [subsectionId]: {
+        ...prev[subsectionId],
+        status: value
+      }
+    }));
+  }, []);
+
+  const handleJustificationChange = useCallback((subsectionId, value) => {
+    setSubsectionsStatus(prev => ({
+      ...prev,
+      [subsectionId]: {
+        ...prev[subsectionId],
+        justification: value
+      }
+    }));
+  }, []);
 
   const handleSubmit = async () => {
     const updatedReportData = {
       company: selectedCompany,
       repository: selectedRepository,
     };
-  
+
     try {
-      // First, update the main report data
-      const response = await api.put(`/api/reports/${reportSelected.id}/`, updatedReportData);
-      if (response.status === 200) {  // Assuming 200 OK for a successful PUT request
-        console.log('Report updated:', response);
-  
-        // Then, update subsection statuses
-        const updatedSubsectionsStatus = Object.values(subsectionsStatus).map(({ subsectionStatusId, subsectionId, status, justification }) => ({
-          id: subsectionStatusId, // This is crucial for identifying the specific subsection status to update
-          status: status,
-          justification: justification
+      const response = await api.put(`/api/reports/${reportSelected?.id}/`, updatedReportData);
+      if (response.status === 200) {
+        const updatedSubsectionsStatus = Object.values(subsectionsStatus).map(({ subsectionStatusId, status, justification }) => ({
+          id: subsectionStatusId,
+          status,
+          justification
         }));
-  
-        console.log('Updating subsections status:', updatedSubsectionsStatus);
-  
-        const subsectionsResponse = await api.post(`/api/reports/${reportSelected.id}/update-subsections-status/`, updatedSubsectionsStatus);
-        console.log('Subsections update response:', subsectionsResponse);
+
+        const subsectionsResponse = await api.post(`/api/reports/${reportSelected?.id}/update-subsections-status/`, updatedSubsectionsStatus);
         if (subsectionsResponse.status === 200) {
-          onClose(); // Close the modal
-          refresher(); // Refresh data in parent component
+          onClose();
+          refresher();
         } else {
           console.error('Failed to update subsection status:', subsectionsResponse.data.message);
         }
@@ -137,58 +170,8 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
       console.error('Error updating report and subsections:', error);
     }
   };
-  
 
-  const handleStatusChange = (subsectionId, value) => {
-    setSubsectionsStatus(prev => ({
-      ...prev,
-      [subsectionId]: {
-        ...prev[subsectionId],
-        status: value
-      }
-    }));
-  };
-
-  const handleJustificationChange = (subsectionId, value) => {
-    setSubsectionsStatus(prev => ({
-      ...prev,
-      [subsectionId]: {
-        ...prev[subsectionId],
-        justification: value
-      }
-    }));
-  };
-
-  const initializeSubsectionStates = async (sectionsId) => {
-    const subsections = {};
-    try {
-      for (const sectionId of sectionsId) {
-        console.log('Section ID:', sectionId);
-        const { data: subsectionsData } = await api.get(`/api/sections/${sectionId}/subsections/`);
-        const { data: subsectionsStatusData } = await api.get(`/api/reports/${reportSelected.id}/subsections-status/`);
-  
-        subsectionsData.forEach(subsection => {
-          const subsectionStatus = subsectionsStatusData.find(subsectionStatus => subsectionStatus.subsection === subsection.id) || {};
-  
-          subsections[subsection.id] = {
-            sectionId: sectionId,
-            subsectionStatusId: subsectionStatus.id,
-            subsectionId: subsection.id,
-            subsectionName: subsection.name,
-            status: subsectionStatus.status || 'applicable',
-            justification: subsectionStatus.justification || ''
-          };
-        });
-      }
-      setSubsectionsStatus(subsections);
-      console.log('Subsections:', subsections);
-    } catch (error) {
-      console.error('Error initializing subsection states:', error);
-    }
-  };
-  
-
-  if (!isOpen) return null; // Ensure that the component does nothing when not open
+  if (!isOpen) return null;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -198,7 +181,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
         <ModalCloseButton />
         <ModalBody>
           {report ? (
-            <React.Fragment>
+            <>
               <FormControl>
                 <FormLabel>Company</FormLabel>
                 <Select value={selectedCompany} onChange={handleCompanyChange}>
@@ -215,42 +198,39 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
                   ))}
                 </Select>
               </FormControl>
-
               {sections.map((section) => (
-                  <Box key={section.id}>
-                    <Text fontSize="lg" fontWeight="bold" mt={4}>{section.name}</Text>
-                    <Table size="sm">
-                      <Thead>
-                        <Tr>
-                          <Th>Subsection</Th>
-                          <Th>Status</Th>
-                          <Th>Justification</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {Object.entries(subsectionsStatus)
-                          .filter(([_, subsection]) => subsection.sectionId === section.id)
-                          .map(([id, { subsectionName, status, justification }]) => (
-                            <Tr key={id}>
-                              <Td>{subsectionName}</Td>
-                              <Td>
-                                <Select value={status} onChange={(e) => handleStatusChange(id, e.target.value)}>
-                                  <option value="applicable">Applicable</option>
-                                  <option value="not_applicable">Not Applicable</option>
-                                </Select>
-                              </Td>
-                              <Td>
-                                <Textarea value={justification} onChange={(e) => handleJustificationChange(id, e.target.value)} />
-                              </Td>
-                            </Tr>
-                          ))}
-                      </Tbody>
-                    </Table>
-                  </Box>
-                ))}
-
-              
-            </React.Fragment>
+                <Box key={section.id}>
+                  <Text fontSize="lg" fontWeight="bold" mt={4}>{section.name}</Text>
+                  <Table size="sm">
+                    <Thead>
+                      <Tr>
+                        <Th>Subsection</Th>
+                        <Th>Status</Th>
+                        <Th>Justification</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {Object.entries(subsectionsStatus)
+                        .filter(([_, subsection]) => subsection.sectionId === section.id)
+                        .map(([id, { subsectionName, status, justification }]) => (
+                          <Tr key={id}>
+                            <Td>{subsectionName}</Td>
+                            <Td>
+                              <Select value={status} onChange={(e) => handleStatusChange(id, e.target.value)}>
+                                <option value="applicable">Applicable</option>
+                                <option value="not_applicable">Not Applicable</option>
+                              </Select>
+                            </Td>
+                            <Td>
+                              <Textarea value={justification} onChange={(e) => handleJustificationChange(id, e.target.value)} />
+                            </Td>
+                          </Tr>
+                        ))}
+                    </Tbody>
+                  </Table>
+                </Box>
+              ))}
+            </>
           ) : (
             <Spinner
               thickness='4px'

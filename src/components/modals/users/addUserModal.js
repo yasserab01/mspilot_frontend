@@ -10,15 +10,16 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Input
+  Input,
+  Spinner
 } from "@chakra-ui/react";
-
 import api from 'api';
 
-function AddUserModal({ isOpen, onClose, refresher}) {
+function AddUserModal({ isOpen, onClose, refresher }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,6 +29,7 @@ function AddUserModal({ isOpen, onClose, refresher}) {
   };
 
   const handleSave = async () => {
+    setIsLoading(true);
     try {
       const response = await api.post('/api/users/', {
         username,
@@ -41,11 +43,16 @@ function AddUserModal({ isOpen, onClose, refresher}) {
       });
       console.log(response); // Log the response from the server
       onClose(); // Close the modal on successful save
-      refresher((prev)=>!prev); // Refresh the data in the parent component
+      refresher((prev) => !prev); // Refresh the data in the parent component
+      setUsername(''); // Reset the form fields
+      setEmail('');
+      setPassword('');
     } catch (error) {
       console.error('Error saving user:', error);
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -64,7 +71,9 @@ function AddUserModal({ isOpen, onClose, refresher}) {
           </FormControl>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="blue" onClick={handleSave} mr={3}>Save</Button>
+          <Button colorScheme="blue" onClick={handleSave} mr={3} isLoading={isLoading}>
+            {isLoading ? <Spinner size="sm" /> : 'Save'}
+          </Button>
           <Button onClick={onClose}>Cancel</Button>
         </ModalFooter>
       </ModalContent>
