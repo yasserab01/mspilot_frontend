@@ -9,6 +9,8 @@ import theme from 'theme/theme';
 import { ThemeEditorProvider } from '@hypertheme-editor/chakra-ui';
 import ProtectedRoute from 'components/protectedRoutes';
 import { UserProvider } from './contexts/UserContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 ReactDOM.render(
   <ChakraProvider theme={theme}>
@@ -24,6 +26,7 @@ ReactDOM.render(
               <Redirect from="/" to="/admin" />
             </Switch>
           </BrowserRouter>
+          <ToastContainer />
         </UserProvider>
       </ThemeEditorProvider>
     </React.StrictMode>

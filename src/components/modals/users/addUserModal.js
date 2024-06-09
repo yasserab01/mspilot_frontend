@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -11,46 +11,52 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Spinner
+  Spinner,
+  Text
 } from "@chakra-ui/react";
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 import api from 'api';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const validationSchema = Yup.object().shape({
+  username: Yup.string().required('Username is required'),
+  email: Yup.string().email('Invalid email address').required('Email is required'),
+  password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required')
+});
 
 function AddUserModal({ isOpen, onClose, refresher }) {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'username') setUsername(value);
-    if (name === 'email') setEmail(value);
-    if (name === 'password') setPassword(value);
+  const initialValues = {
+    username: '',
+    email: '',
+    password: ''
   };
 
-  const handleSave = async () => {
-    setIsLoading(true);
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+    setSubmitting(true);
     try {
-      const response = await api.post('/api/users/', {
-        username,
-        email,
-        password
-      },
-      {
+      const response = await api.post('/api/users/', values, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      console.log(response); // Log the response from the server
+      if (response.status !== 201) {
+        throw new Error('Error saving user');
+      }
+      toast.success('User added successfully!', {
+        position: 'bottom-center',
+      });
       onClose(); // Close the modal on successful save
       refresher((prev) => !prev); // Refresh the data in the parent component
-      setUsername(''); // Reset the form fields
-      setEmail('');
-      setPassword('');
+      resetForm(); // Reset the form fields
     } catch (error) {
       console.error('Error saving user:', error);
+      toast.error('Error saving user.', {
+        position: 'bottom-center',
+      });
     } finally {
-      setIsLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -61,21 +67,44 @@ function AddUserModal({ isOpen, onClose, refresher }) {
         <ModalHeader>Add New User</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FormControl>
-            <FormLabel>Username</FormLabel>
-            <Input placeholder="Username" name='username' value={username} onChange={handleInputChange} />
-            <FormLabel mt={4}>Email</FormLabel>
-            <Input placeholder="Email" name='email' value={email} onChange={handleInputChange} />
-            <FormLabel mt={4}>Password</FormLabel>
-            <Input placeholder="Password" type='password' name='password' value={password} onChange={handleInputChange} />
-          </FormControl>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting, errors, touched }) => (
+              <Form>
+                <FormControl isInvalid={errors.username && touched.username}>
+                  <FormLabel>Username</FormLabel>
+                  <Field as={Input} name="username" placeholder="Username" />
+                  {errors.username && touched.username && (
+                    <Text color="red.500">{errors.username}</Text>
+                  )}
+                </FormControl>
+                <FormControl isInvalid={errors.email && touched.email} mt={4}>
+                  <FormLabel>Email</FormLabel>
+                  <Field as={Input} name="email" placeholder="Email" />
+                  {errors.email && touched.email && (
+                    <Text color="red.500">{errors.email}</Text>
+                  )}
+                </FormControl>
+                <FormControl isInvalid={errors.password && touched.password} mt={4}>
+                  <FormLabel>Password</FormLabel>
+                  <Field as={Input} type="password" name="password" placeholder="Password" />
+                  {errors.password && touched.password && (
+                    <Text color="red.500">{errors.password}</Text>
+                  )}
+                </FormControl>
+                <ModalFooter>
+                  <Button colorScheme="blue" type="submit" mr={3} isLoading={isSubmitting}>
+                    {isSubmitting ? <Spinner size="sm" /> : 'Save'}
+                  </Button>
+                  <Button onClick={onClose}>Cancel</Button>
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
         </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" onClick={handleSave} mr={3} isLoading={isLoading}>
-            {isLoading ? <Spinner size="sm" /> : 'Save'}
-          </Button>
-          <Button onClick={onClose}>Cancel</Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

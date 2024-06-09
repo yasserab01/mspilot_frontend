@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -12,33 +12,36 @@ import {
   FormLabel,
   Input
 } from "@chakra-ui/react";
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import api from 'api';
 
-function AddCompanyModal({ isOpen, onClose, refresher}) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [name, setName] = useState('');
+const AddCompanyModal = ({ isOpen, onClose, refresher }) => {
+  const validationSchema = Yup.object({
+    name: Yup.string().required('Name is required'),
+  });
 
-  const handleInputChange = (e) => {
-    setName(e.target.value);
-  };
-
-  const handleSave = async () => {
-    setIsLoading(true);
+  const handleSave = async (values, { setSubmitting }) => {
     try {
-      const response = await api.post('/api/companies/', {
-        name,
-      });
+      const response = await api.post('/api/companies/', values);
       console.log(response); // Log the response from the server
+      toast.success('Company added successfully!', {
+        position: 'bottom-center',
+      });
       onClose(); // Close the modal on successful save
-      refresher((prev)=>!prev); // Refresh the data in the parent component
+      refresher((prev) => !prev); // Refresh the data in the parent component
     } catch (error) {
-      console.error('Error saving user:', error);
+      console.error('Error saving company:', error);
+      toast.error('Error saving company.', {
+        position: 'bottom-center',
+      });
+    } finally {
+      setSubmitting(false);
     }
-    finally {
-      setIsLoading(false);
-    }
-  }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -47,18 +50,36 @@ function AddCompanyModal({ isOpen, onClose, refresher}) {
         <ModalHeader>Add New Company</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FormControl>
-            <FormLabel>Name</FormLabel>
-            <Input placeholder="Name" name='name' value={name} onChange={handleInputChange} />
-          </FormControl>
+          <Formik
+            initialValues={{ name: '' }}
+            validationSchema={validationSchema}
+            onSubmit={handleSave}
+          >
+            {({ isSubmitting }) => (
+              <Form>
+                <FormControl>
+                  <FormLabel htmlFor="name">Name</FormLabel>
+                  <Field
+                    as={Input}
+                    id="name"
+                    name="name"
+                    placeholder="Name"
+                  />
+                  <ErrorMessage name="name" component="div" style={{ color: 'red' }} />
+                </FormControl>
+                <ModalFooter>
+                  <Button colorScheme="blue" type="submit" mr={3} isLoading={isSubmitting}>
+                    Save
+                  </Button>
+                  <Button onClick={onClose}>Cancel</Button>
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
         </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" onClick={handleSave} mr={3} isLoading={isLoading} >Save</Button>
-          <Button onClick={onClose}>Cancel</Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );
-}
+};
 
 export default AddCompanyModal;

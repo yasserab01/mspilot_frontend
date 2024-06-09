@@ -20,7 +20,7 @@ import {
   Th,
   Td,
   Box,
-  Spinner
+  Spinner,
 } from "@chakra-ui/react";
 import api from 'api';
 
@@ -33,6 +33,13 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
   const [subsectionsStatus, setSubsectionsStatus] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+
+  const resetForm = () => {
+    setSelectedCompany('');
+    setSelectedRepository('');
+    setSections([]);
+    setSubsectionsStatus({});
+  };
 
   useEffect(() => {
     const fetchCompaniesAndRepositories = async () => {
@@ -95,7 +102,6 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
         });
       });
       setSubsectionsStatus(subsections);
-      console.log('Subsections:', subsections);
     } catch (error) {
       console.error('Error fetching subsections:', error);
     }
@@ -140,29 +146,36 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
           justification: subsection.justification
         }));
 
-        console.log('Subsections data:', subsectionsData);
-
         const subsectionsResponse = await api.post(`/api/reports/${reportId}/subsections/`, { subsections: subsectionsData });
         if (subsectionsResponse.status === 201 || subsectionsResponse.status === 200) {
           onClose();
           refresher(prev => !prev);
+          resetForm();
         } else {
           console.error('Failed to create subsection status:', subsectionsResponse.data.message);
+
         }
       } else {
         console.error('Failed to create report:', response.data.message);
+
       }
     } catch (error) {
       console.error('Error submitting form:', error);
+
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent maxWidth="70vw" width="70vw">
         <ModalHeader>Add New Report</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
@@ -225,7 +238,7 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
         </ModalBody>
         <ModalFooter>
           <Button colorScheme="blue" mr={3} onClick={handleSubmit} isLoading={isLoading}>Save</Button>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleClose}>Cancel</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

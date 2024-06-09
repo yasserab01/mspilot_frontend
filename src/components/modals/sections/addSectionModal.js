@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -12,50 +12,38 @@ import {
   FormLabel,
   Input,
   IconButton,
-  VStack
+  VStack,
+  Text,
+  Box
 } from "@chakra-ui/react";
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
+import { Formik, Form, Field, FieldArray } from 'formik';
+import * as Yup from 'yup';
 import api from 'api';
 
+const validationSchema = Yup.object().shape({
+  id: Yup.string().required('Section ID is required'),
+  name: Yup.string().required('Section name is required'),
+  subsections: Yup.array().of(
+    Yup.object().shape({
+      name: Yup.string().required('Subsection name is required')
+    })
+  )
+});
+
 function AddSectionModal({ isOpen, onClose, refresher }) {
-  const [name, setName] = useState('');
-  const [id, setId] = useState('');
-  const [subsections, setSubsections] = useState([{ name: '' }]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleNameChange = (e) => {
-    setName(e.target.value);
+  const initialValues = {
+    id: '',
+    name: '',
+    subsections: [{ name: '' }]
   };
 
-  const handleIdChange = (e) => {
-    setId(e.target.value);
-  };
-
-  const handleSubsectionChange = (index, event) => {
-    const newSubsections = subsections.map((subsection, i) => {
-      if (index === i) {
-        return { ...subsection, name: event.target.value };
-      }
-      return subsection;
-    });
-    setSubsections(newSubsections);
-  };
-
-  const handleAddSubsection = () => {
-    setSubsections([...subsections, { name: '' }]);
-  };
-
-  const handleRemoveSubsection = (index) => {
-    setSubsections(subsections.filter((_, i) => i !== index));
-  };
-
-  const handleSave = async () => {
-    setIsLoading(true);
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const response = await api.post('/api/sections/', {
-        id,
-        name,
-        subsections,
+        id: values.id,
+        name: values.name,
+        subsections: values.subsections
       });
       console.log(response); // Log the response from the server
       onClose(); // Close the modal on successful save
@@ -63,7 +51,7 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
     } catch (error) {
       console.error('Error saving section:', error);
     } finally {
-      setIsLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -74,37 +62,79 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
         <ModalHeader>Add New Section</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FormControl>
-            <FormLabel>Id</FormLabel>
-            <Input placeholder="Section Id" name='id' value={id} onChange={handleIdChange} />
-            <FormLabel>Name</FormLabel>
-            <Input placeholder="Section Name" name='name' value={name} onChange={handleNameChange} />
-          </FormControl>
-          <FormLabel mt={4}>Subsections</FormLabel>
-          <VStack spacing={4}>
-            {subsections.map((subsection, index) => (
-              <FormControl key={index} display="flex" alignItems="center">
-                <Input
-                  placeholder={`Subsection ${index + 1} Name`}
-                  value={subsection.name}
-                  onChange={(e) => handleSubsectionChange(index, e)}
-                />
-                <IconButton
-                  icon={<DeleteIcon />}
-                  onClick={() => handleRemoveSubsection(index)}
-                  ml={2}
-                  aria-label="Remove subsection"
-                  colorScheme="red"
-                />
-              </FormControl>
-            ))}
-            <Button leftIcon={<AddIcon />} onClick={handleAddSubsection} colorScheme="blue">Add Subsection</Button>
-          </VStack>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ values, handleChange, handleBlur, errors, touched, isSubmitting }) => (
+              <Form>
+                <FormControl>
+                  <FormLabel>Id</FormLabel>
+                  <Field
+                    as={Input}
+                    name="id"
+                    placeholder="Section Id"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.id}
+                  />
+                  {errors.id && touched.id && (
+                    <Text color="red.500">{errors.id}</Text>
+                  )}
+                  <FormLabel>Name</FormLabel>
+                  <Field
+                    as={Input}
+                    name="name"
+                    placeholder="Section Name"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.name}
+                  />
+                  {errors.name && touched.name && (
+                    <Text color="red.500">{errors.name}</Text>
+                  )}
+                </FormControl>
+                <FormLabel mt={4}>Subsections</FormLabel>
+                <FieldArray name="subsections">
+                  {({ push, remove }) => (
+                    <VStack mt={4} spacing={4}>
+                      {values.subsections.map((subsection, index) => (
+                        <Box key={index} width="100%">
+                          <FormControl display="flex" alignItems="center">
+                            <Field
+                              as={Input}
+                              name={`subsections.${index}.name`}
+                              placeholder={`Subsection ${index + 1} Name`}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              value={subsection.name}
+                            />
+                            <IconButton
+                              icon={<DeleteIcon />}
+                              onClick={() => remove(index)}
+                              ml={2}
+                              aria-label="Remove subsection"
+                              colorScheme="red"
+                            />
+                          </FormControl>
+                          {errors.subsections && errors.subsections[index] && errors.subsections[index].name && touched.subsections && touched.subsections[index] && touched.subsections[index].name && (
+                            <Text color="red.500">{errors.subsections[index].name}</Text>
+                          )}
+                        </Box>
+                      ))}
+                      <Button leftIcon={<AddIcon />} onClick={() => push({ name: '' })} colorScheme="blue">Add Subsection</Button>
+                    </VStack>
+                  )}
+                </FieldArray>
+                <ModalFooter>
+                  <Button colorScheme="blue" type="submit" mr={3} isLoading={isSubmitting}>Save</Button>
+                  <Button onClick={onClose}>Cancel</Button>
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
         </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" onClick={handleSave} mr={3} isLoading={isLoading}>Save</Button>
-          <Button onClick={onClose}>Cancel</Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

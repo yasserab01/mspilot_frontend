@@ -17,6 +17,10 @@ import {
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import api from 'api';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+
 
 function UpdateUserModal({ isOpen, onClose, user, refresher }) {
   const fileInputRef = useRef(null);
@@ -59,24 +63,36 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
       const formData = new FormData();
       formData.append('username', username);
       formData.append('email', email);
+      
       if (fileInputRef.current?.files[0]) {
         formData.append('photo', fileInputRef.current.files[0]);
-        const Upload = await api.post(`/api/users/${user_id}/upload-picture/`, 
+        const uploadResponse = await api.post(
+          `/api/users/${user_id}/upload-picture/`,
           { picture: fileInputRef.current.files[0] },
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
-        console.log(Upload.data);
+        console.log(uploadResponse.data);
       }
+      
       const response = await api.put(`/api/users/${user_id}/`, formData);
       console.log(response);
+      
+      toast.success('User updated successfully!', {
+        position: 'bottom-center',
+      });
+      
       onClose();
       refresher((prev) => !prev);
     } catch (error) {
       console.error('Error saving user:', error);
+      toast.error('Error saving user.', {
+        position: 'bottom-center',
+      });
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   const openFileSelector = () => {
     fileInputRef.current.click();
@@ -85,6 +101,7 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
   if (!user) return null;
 
   return (
+    <>
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
@@ -124,6 +141,8 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
         </ModalFooter>
       </ModalContent>
     </Modal>
+    <ToastContainer />
+    </>
   );
 }
 

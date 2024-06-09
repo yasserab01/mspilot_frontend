@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -12,36 +12,37 @@ import {
   FormLabel,
   Input,
 } from "@chakra-ui/react";
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import api from 'api';
 
-function UpdateCompanyModal({ isOpen, onClose, company, refresher }) {
-  const [name, setName] = useState('');
+const UpdateCompanyModal = ({ isOpen, onClose, company, refresher }) => {
+  const validationSchema = Yup.object({
+    name: Yup.string().required('Name is required'),
+  });
 
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-
-  // Update state when user prop changes
-  useEffect(() => {
-    if (company) {
-      setName(company.name || '');
-    }
-  }, [company]);
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const company_id = company.id;
-      const response = await api.put(`/api/companies/${company_id}/`, {
-        name,
-      });
+      const response = await api.put(`/api/companies/${company_id}/`, values);
       console.log(response); // Log the response from the server
+      toast.success('Company updated successfully!', {
+        position: 'bottom-center',
+      });
       onClose(); // Close the modal on successful save
       refresher((prev) => !prev); // Trigger a re-fetch of the data
     } catch (error) {
-      console.error('Error saving user:', error);
+      console.error('Error saving company:', error);
+      toast.error('Error saving company.', {
+        position: 'bottom-center',
+      });
+    } finally {
+      setSubmitting(false);
     }
-  }
-
+  };
 
   if (!company) return null;
 
@@ -52,18 +53,37 @@ function UpdateCompanyModal({ isOpen, onClose, company, refresher }) {
         <ModalHeader>Update Company</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FormControl>
-            <FormLabel>Name</FormLabel>
-            <Input placeholder="name" value={name} onChange={handleNameChange}  />
-          </FormControl>
+          <Formik
+            initialValues={{ name: company.name || '' }}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+            enableReinitialize
+          >
+            {({ isSubmitting }) => (
+              <Form>
+                <FormControl>
+                  <FormLabel htmlFor="name">Name</FormLabel>
+                  <Field
+                    as={Input}
+                    id="name"
+                    name="name"
+                    placeholder="Name"
+                  />
+                  <ErrorMessage name="name" component="div" style={{ color: 'red' }} />
+                </FormControl>
+                <ModalFooter>
+                  <Button colorScheme="blue" type="submit" mr={3} isLoading={isSubmitting}>
+                    Save
+                  </Button>
+                  <Button onClick={onClose}>Cancel</Button>
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
         </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleSubmit}>Save</Button>
-          <Button onClick={onClose}>Cancel</Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );
-}
+};
 
 export default UpdateCompanyModal;

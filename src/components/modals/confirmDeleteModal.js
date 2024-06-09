@@ -11,6 +11,8 @@ import {
   Text,
   Spinner
 } from '@chakra-ui/react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function DeleteConfirmationModal({ isOpen, onClose, onConfirm, userName }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,9 +21,15 @@ function DeleteConfirmationModal({ isOpen, onClose, onConfirm, userName }) {
     setIsLoading(true);
     try {
       await onConfirm();
+      toast.success('Element deleted successfully!', {
+        position: 'top-center',
+      });
       onClose();
     } catch (error) {
       console.error(error);
+      toast.error('Error deleting element.', {
+        position: 'top-center',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -31,7 +39,7 @@ function DeleteConfirmationModal({ isOpen, onClose, onConfirm, userName }) {
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Delete User</ModalHeader>
+        <ModalHeader>Delete Element</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Text>Are you sure you want to delete {userName}? This action cannot be undone.</Text>

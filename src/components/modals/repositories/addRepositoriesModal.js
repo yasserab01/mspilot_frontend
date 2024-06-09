@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -10,15 +10,14 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Input
+  Input,
 } from "@chakra-ui/react";
-
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 import SelectSections from '../sections/SelectSections';
-
 import api from 'api'; // Import API configuration for HTTP requests
 
-function AddRepositoryModal({ isOpen, onClose, refresher }) {
-  const [name, setName] = useState(''); // State to store the repository name
+const AddRepositoryModal = ({ isOpen, onClose, refresher }) => {
   const [sections, setSections] = useState([]); // State to store list of sections fetched from the API
   const [selectedSections, setSelectedSections] = useState([]); // State to store user-selected sections
 
@@ -36,15 +35,16 @@ function AddRepositoryModal({ isOpen, onClose, refresher }) {
     fetchSections();
   }, []);
 
-  const handleInputChange = (e) => {
-    setName(e.target.value); // Update the repository name as the user types
-  };
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required('Name is required'),
+    sections: Yup.array().min(1, 'At least one section is required'),
+  });
 
-  const handleSave = async () => {
+  const handleSave = async (values) => {
     try {
       const sections_id = selectedSections.map(sec => sec.value); // Extract the section IDs from the selected sections
       const response = await api.post('/api/repositories/', {
-        name,
+        name: values.name,
         sections: sections_id,
       });
       console.log(response); // Log the successful server response
@@ -53,7 +53,7 @@ function AddRepositoryModal({ isOpen, onClose, refresher }) {
     } catch (error) {
       console.error('Error saving repository:', error); // Log any errors encountered during save
     }
-  }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -62,20 +62,36 @@ function AddRepositoryModal({ isOpen, onClose, refresher }) {
         <ModalHeader>Add New Repository</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-            <FormControl>
-                <FormLabel>Name</FormLabel>
-                <Input placeholder="Name" name='name' value={name} onChange={handleInputChange} />
-            </FormControl>
-            <SelectSections sections={sections} selectedSections={selectedSections} setSelectedSections={setSelectedSections} />
+          <Formik
+            initialValues={{ name: '' }}
+            validationSchema={validationSchema}
+            onSubmit={handleSave}
+          >
+            {({ errors, touched }) => (
+              <Form>
+                <FormControl>
+                  <FormLabel>Name</FormLabel>
+                  <Field as={Input} name="name" placeholder="Name" />
+                  {errors.name && touched.name ? (
+                    <div style={{ color: 'red' }}>{errors.name}</div>
+                  ) : null}
+                </FormControl>
+                <SelectSections
+                  sections={sections}
+                  selectedSections={selectedSections}
+                  setSelectedSections={setSelectedSections}
+                />
+                <ModalFooter>
+                  <Button colorScheme="blue" type="submit" mr={3}>Save</Button>
+                  <Button onClick={onClose}>Cancel</Button>
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
         </ModalBody>
-
-        <ModalFooter>
-          <Button colorScheme="blue" onClick={handleSave} mr={3}>Save</Button>
-          <Button onClick={onClose}>Cancel</Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );
-}
+};
 
 export default AddRepositoryModal;

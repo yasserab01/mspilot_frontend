@@ -32,6 +32,15 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
   const [selectedRepository, setSelectedRepository] = useState('');
   const [sections, setSections] = useState([]);
   const [subsectionsStatus, setSubsectionsStatus] = useState({});
+  const [isFetching, setIsFetching] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const resetForm = () => {
+    setSelectedCompany('');
+    setSelectedRepository('');
+    setSections([]);
+    setSubsectionsStatus({});
+  };
 
   const fetchSections = useCallback(async (sectionsId) => {
     try {
@@ -76,6 +85,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
     if (!reportSelected) return;
 
     try {
+      setIsFetching(true);
       const [companyRes, allCompanies, repositoryRes, allRepositories, reportRes] = await Promise.all([
         api.get(`/api/companies/${reportSelected.company}/`),
         api.get(`/api/companies/`),
@@ -95,6 +105,8 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
 
     } catch (error) {
       console.error('Error fetching initial data:', error);
+    } finally {
+      setIsFetching(false);
     }
   }, [fetchSections, initializeSubsectionStates, reportSelected]);
 
@@ -113,11 +125,14 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
     setSelectedRepository(repoId);
 
     try {
+      setIsFetching(true);
       const { data } = await api.get(`/api/repositories/${repoId}/`);
       await fetchSections(data.sections);
       await initializeSubsectionStates(data.sections);
     } catch (error) {
       console.error('Error fetching sections:', error);
+    } finally {
+      setIsFetching(false);
     }
   }, [fetchSections, initializeSubsectionStates]);
 
@@ -142,6 +157,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
   }, []);
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     const updatedReportData = {
       company: selectedCompany,
       repository: selectedRepository,
@@ -160,6 +176,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
         if (subsectionsResponse.status === 200) {
           onClose();
           refresher();
+          resetForm();
         } else {
           console.error('Failed to update subsection status:', subsectionsResponse.data.message);
         }
@@ -168,19 +185,28 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
       }
     } catch (error) {
       console.error('Error updating report and subsections:', error);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent maxWidth="90vw" width="90vw">
         <ModalHeader>Update Report</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {report ? (
+          {isFetching ? (
+            <Spinner size="xl" />
+          ) : (
             <>
               <FormControl>
                 <FormLabel>Company</FormLabel>
@@ -231,20 +257,11 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
                 </Box>
               ))}
             </>
-          ) : (
-            <Spinner
-              thickness='4px'
-              speed='0.65s'
-              emptyColor='gray.200'
-              color='blue.500'
-              size='xl'
-              margin={{ base: '0 auto', md: '0' }}
-            />
           )}
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleSubmit}>Save Changes</Button>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button colorScheme="blue" mr={3} onClick={handleSubmit} isLoading={isLoading}>Save Changes</Button>
+          <Button onClick={handleClose}>Cancel</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
