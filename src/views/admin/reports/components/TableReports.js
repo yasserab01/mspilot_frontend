@@ -11,7 +11,10 @@ import {
   Thead,
   Tr,
   useColorModeValue,
-  useDisclosure
+  useDisclosure,
+  Input,
+  Box,
+  Select
 } from "@chakra-ui/react";
 import { DeleteIcon, DownloadIcon, EditIcon } from "@chakra-ui/icons";
 import {
@@ -69,6 +72,15 @@ function TableReports({ columnsData, tableData, refresh, searchQuery }) {
     page,
     prepareRow,
     setGlobalFilter: setTableGlobalFilter,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    state,
+    gotoPage,
+    nextPage,
+    previousPage,
+    pageCount,
+    setPageSize,
   } = tableInstance;
 
   const textColor = useColorModeValue("navy.700", "white");
@@ -224,6 +236,54 @@ function TableReports({ columnsData, tableData, refresh, searchQuery }) {
             })}
           </Tbody>
         </Table>
+        <Flex justify="space-between" alignItems="center" m={4}>
+          <Flex>
+            <Button onClick={() => gotoPage(0)} disabled={!canPreviousPage} mr={2}>
+              {"<<"}
+            </Button>
+            <Button onClick={() => previousPage()} disabled={!canPreviousPage} mr={2}>
+              {"<"}
+            </Button>
+            <Button onClick={() => nextPage()} disabled={!canNextPage} mr={2}>
+              {">"}
+            </Button>
+            <Button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+              {">>"}
+            </Button>
+          </Flex>
+          <Box>
+            <Text>
+              Page{" "}
+              <strong>
+                {state.pageIndex + 1} of {pageOptions.length}
+              </strong>
+            </Text>
+          </Box>
+          <Flex alignItems="center">
+            <Text mr={2}>Go to page:</Text>
+            <Input
+              type="number"
+              defaultValue={state.pageIndex + 1}
+              onChange={(e) => {
+                const pageNumber = e.target.value ? Number(e.target.value) - 1 : 0;
+                gotoPage(pageNumber);
+              }}
+              width="50px"
+              mr={2}
+            />
+            <Select
+              value={state.pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              width="100px"
+            >
+              {[5, 10, 15, 20].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </Select>
+          </Flex>
+        </Flex>
       </Flex>
     </>
   );

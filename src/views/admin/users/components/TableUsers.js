@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Box,
   Button,
   Flex,
   IconButton,
@@ -12,9 +13,11 @@ import {
   Tr,
   useColorModeValue,
   useDisclosure,
+  Input,
+  Select,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
-import React, { useMemo, useState, useEffect, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   useGlobalFilter,
   usePagination,
@@ -28,43 +31,50 @@ import AddUserModal from "components/modals/users/addUserModal";
 import UpdateUserModal from "components/modals/users/updateUserModal";
 import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
 
-function TableUsers(props) {
-  const { columnsData, tableData, refresh, searchQuery } = props;
-
+const TableUsers = ({ columnsData, tableData, refresh, searchQuery }) => {
   const columns = useMemo(() => columnsData, [columnsData]);
   const data = useMemo(() => tableData, [tableData]);
 
   const [currentUser, setCurrentUser] = useState(null);
-
-  const { isOpen, onOpen, onClose } = useDisclosure(); // For AddUserModal
-  const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onClose: onUpdateClose } = useDisclosure(); // For UpdateUserModal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
 
-  const handleEdit = useCallback((userData) => {
-    setCurrentUser(userData);
-    onUpdateOpen();
-  }, [onUpdateOpen]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isUpdateOpen,
+    onOpen: onUpdateOpen,
+    onClose: onUpdateClose,
+  } = useDisclosure();
 
-  const handleDeleteClick = useCallback((user) => {
-    setUserToDelete(user);
-    setIsDeleteModalOpen(true);
-  }, []);
+  const handleEdit = useCallback(
+    (userData) => {
+      setCurrentUser(userData);
+      onUpdateOpen();
+    },
+    [onUpdateOpen]
+  );
+
+  const handleDeleteClick = useCallback(
+    (user) => {
+      setUserToDelete(user);
+      setIsDeleteModalOpen(true);
+    },
+    []
+  );
 
   const handleConfirmDelete = useCallback(async () => {
     try {
       await api.delete(`/api/users/${userToDelete.id}/`);
-      refresh(prev => !prev); // Assuming you have a function to refetch user data
+      refresh((prev) => !prev);
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
     } catch (error) {
-      console.error('Error deleting user:', error);
-      // Optionally handle error, e.g., show an error message
+      console.error("Error deleting user:", error);
     }
   }, [userToDelete, refresh]);
 
   const tableInstance = useTable(
-    { columns, data, initialState: { globalFilter: searchQuery } },
+    { columns, data },
     useGlobalFilter,
     useSortBy,
     usePagination
@@ -75,12 +85,20 @@ function TableUsers(props) {
     getTableBodyProps,
     headerGroups,
     page,
+    nextPage,
+    previousPage,
+    canNextPage,
+    canPreviousPage,
+    pageOptions,
+    state,
+    gotoPage,
+    pageCount,
+    setPageSize,
     prepareRow,
     setGlobalFilter: setTableGlobalFilter,
   } = tableInstance;
 
   useEffect(() => {
-    console.log("Search query:", searchQuery);
     setTableGlobalFilter(searchQuery || "");
   }, [searchQuery, setTableGlobalFilter]);
 
@@ -90,17 +108,19 @@ function TableUsers(props) {
   return (
     <>
       <AddUserModal isOpen={isOpen} onClose={onClose} refresher={refresh} />
-      <UpdateUserModal isOpen={isUpdateOpen} onClose={onUpdateClose} user={currentUser} refresher={refresh} />
+      <UpdateUserModal
+        isOpen={isUpdateOpen}
+        onClose={onUpdateClose}
+        user={currentUser}
+        refresher={refresh}
+      />
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        userName={userToDelete ? userToDelete.name : ''}
+        userName={userToDelete ? userToDelete.name : ""}
       />
-      <Flex
-        direction="column"
-        w="100%"
-        overflowX={{ sm: "scroll", lg: "hidden" }}>
+      <Flex direction="column" w="100%" overflowX={{ sm: "scroll", lg: "hidden" }}>
         <Flex
           align={{ sm: "flex-start", lg: "center" }}
           justify="space-between"
@@ -108,27 +128,32 @@ function TableUsers(props) {
           px="22px"
           pb="20px"
           mb="10px"
-          boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)">
+          boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)"
+        >
           <Text color={textColor} fontSize="xl" fontWeight="600">
             Users
           </Text>
-          <Button onClick={onOpen} variant="action">Add New User</Button>
+          <Button onClick={onOpen} variant="action">
+            Add New User
+          </Button>
         </Flex>
         <Table {...getTableProps()} variant="simple" color="gray.500">
           <Thead>
-            {headerGroups.map((headerGroup, index) => (
-              <Tr {...headerGroup.getHeaderGroupProps()} key={index}>
-                {headerGroup.headers.map((column, index) => (
+            {headerGroups.map((headerGroup) => (
+              <Tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
+                {headerGroup.headers.map((column) => (
                   <Th
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     pe="10px"
-                    key={index}
-                    borderColor="transparent">
+                    key={column.id}
+                    borderColor="transparent"
+                  >
                     <Flex
                       justify="space-between"
                       align="center"
                       fontSize={{ sm: "10px", lg: "12px" }}
-                      color="gray.400">
+                      color="gray.400"
+                    >
                       {column.render("Header")}
                     </Flex>
                   </Th>
@@ -137,46 +162,50 @@ function TableUsers(props) {
             ))}
           </Thead>
           <Tbody {...getTableBodyProps()}>
-            {page.map((row, index) => {
+            {page.map((row) => {
               prepareRow(row);
               return (
-                <Tr {...row.getRowProps()} key={index}>
-                  {row.cells.map((cell, index) => {
-                    let data = "";
+                <Tr {...row.getRowProps()} key={row.id}>
+                  {row.cells.map((cell) => {
+                    let cellContent;
                     if (cell.column.Header === "Profile Image") {
-                      data = cell.row.original.profile ? (
+                      cellContent = cell.row.original.profile ? (
                         <Avatar
                           src={cell.row.original.profile.picture}
                           w="30px"
                           h="30px"
                           me="8px"
                           onError={({ currentTarget }) => {
-                            currentTarget.onerror = null; // Prevents looping
-                            currentTarget.src = "path/to/default/avatar.jpg"; // Fallback avatar
+                            currentTarget.onerror = null;
+                            currentTarget.src = "path/to/default/avatar.jpg";
                           }}
                         />
                       ) : (
                         <Avatar
-                          src="../../../../assets/img/default.jpg" // Default image if no image URL is present
+                          src="../../../../assets/img/default.jpg"
                           w="30px"
                           h="30px"
                           me="8px"
                         />
                       );
                     } else if (cell.column.Header === "Username") {
-                      data = (
+                      cellContent = (
                         <Text color={textColor} fontSize="sm" fontWeight="600">
                           {cell.value}
                         </Text>
                       );
                     } else if (cell.column.Header === "Email") {
-                      data = (
-                        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+                      cellContent = (
+                        <Text
+                          color={textColorSecondary}
+                          fontSize="sm"
+                          fontWeight="500"
+                        >
                           {cell.value}
                         </Text>
                       );
                     } else if (cell.column.Header === "Actions") {
-                      data = (
+                      cellContent = (
                         <Flex>
                           <IconButton
                             icon={<EditIcon />}
@@ -197,11 +226,12 @@ function TableUsers(props) {
                     return (
                       <Td
                         {...cell.getCellProps()}
-                        key={index}
+                        key={cell.column.id}
                         fontSize={{ sm: "14px" }}
                         minW={{ sm: "150px", md: "200px", lg: "auto" }}
-                        borderColor="transparent">
-                        {data}
+                        borderColor="transparent"
+                      >
+                        {cellContent}
                       </Td>
                     );
                   })}
@@ -210,9 +240,57 @@ function TableUsers(props) {
             })}
           </Tbody>
         </Table>
+        <Flex justify="space-between" alignItems="center" m={4}>
+          <Flex>
+            <Button onClick={() => gotoPage(0)} disabled={!canPreviousPage} mr={2}>
+              {"<<"}
+            </Button>
+            <Button onClick={() => previousPage()} disabled={!canPreviousPage} mr={2}>
+              {"<"}
+            </Button>
+            <Button onClick={() => nextPage()} disabled={!canNextPage} mr={2}>
+              {">"}
+            </Button>
+            <Button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+              {">>"}
+            </Button>
+          </Flex>
+          <Box>
+            <Text>
+              Page{" "}
+              <strong>
+                {state.pageIndex + 1} of {pageOptions.length}
+              </strong>
+            </Text>
+          </Box>
+          <Flex alignItems="center">
+            <Text mr={2}>Go to page:</Text>
+            <Input
+              type="number"
+              defaultValue={state.pageIndex + 1}
+              onChange={(e) => {
+                const pageNumber = e.target.value ? Number(e.target.value) - 1 : 0;
+                gotoPage(pageNumber);
+              }}
+              width="50px"
+              mr={2}
+            />
+            <Select
+              value={state.pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              width="100px"
+            >
+              {[5, 10, 15, 20].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </Select>
+          </Flex>
+        </Flex>
       </Flex>
     </>
   );
-}
+};
 
 export default TableUsers;

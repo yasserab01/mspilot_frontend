@@ -1,3 +1,4 @@
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Flex,
@@ -10,16 +11,13 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  useDisclosure,
+  Select,
+  Box,
+  Input,
 } from "@chakra-ui/react";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  useGlobalFilter,
-  usePagination,
-  useSortBy,
-  useTable,
-} from "react-table";
-import { useDisclosure } from "@chakra-ui/react";
+import { useGlobalFilter, usePagination, useSortBy, useTable } from "react-table";
 import api from "api";
 
 // Custom Modals
@@ -34,16 +32,16 @@ function TableSections(props) {
   const data = useMemo(() => tableData, [tableData]);
 
   const [section, setSection] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [sectionToDelete, setSectionToDelete] = useState(null);
+
+  const { isOpen, onOpen, onClose } = useDisclosure(); // For AddSectionModal
+  const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onClose: onUpdateClose } = useDisclosure(); // For UpdateSectionModal
 
   const handleEdit = (sectionData) => {
     setSection(sectionData);
     onUpdateOpen();
   };
-
-  const { isOpen, onOpen, onClose } = useDisclosure(); // For AddSectionModal
-  const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onClose: onUpdateClose } = useDisclosure(); // For UpdateSectionModal
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [sectionToDelete, setSectionToDelete] = useState(null);
 
   const handleDeleteClick = (section) => {
     setSectionToDelete(section);
@@ -52,8 +50,7 @@ function TableSections(props) {
 
   const handleConfirmDelete = async () => {
     try {
-      const response = await api.delete(`/api/sections/${sectionToDelete.id}/`);
-      console.log('Delete response:', response);
+      await api.delete(`/api/sections/${sectionToDelete.id}/`);
       refresh((prev) => !prev); // Assuming you have a function to refetch section data
       setIsDeleteModalOpen(false);
       setSectionToDelete(null);
@@ -76,11 +73,20 @@ function TableSections(props) {
     headerGroups,
     page,
     prepareRow,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    state,
+    gotoPage,
+    nextPage,
+    previousPage,
+    pageCount,
+    setPageSize,
     setGlobalFilter: setTableGlobalFilter,
   } = tableInstance;
 
   useEffect(() => {
-    setTableGlobalFilter(searchQuery || undefined);
+    setTableGlobalFilter(searchQuery || "");
   }, [searchQuery, setTableGlobalFilter]);
 
   const textColor = useColorModeValue("navy.700", "white");
@@ -114,13 +120,13 @@ function TableSections(props) {
         </Flex>
         <Table {...getTableProps()} variant="simple" colorScheme="gray">
           <Thead>
-            {headerGroups.map((headerGroup, index) => (
-              <Tr {...headerGroup.getHeaderGroupProps()} key={index}>
-                {headerGroup.headers.map((column, index) => (
+            {headerGroups.map((headerGroup) => (
+              <Tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
+                {headerGroup.headers.map((column) => (
                   <Th
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     pe="10px"
-                    key={index}
+                    key={column.id}
                     borderColor="transparent"
                   >
                     <Flex justify="space-between" align="center" fontSize={{ sm: "10px", lg: "12px" }} color="gray.400">
@@ -132,11 +138,11 @@ function TableSections(props) {
             ))}
           </Thead>
           <Tbody {...getTableBodyProps()}>
-            {page.map((row, index) => {
+            {page.map((row) => {
               prepareRow(row);
               return (
-                <Tr {...row.getRowProps()} key={index}>
-                  {row.cells.map((cell, index) => {
+                <Tr {...row.getRowProps()} key={row.id}>
+                  {row.cells.map((cell) => {
                     let data = "";
                     if (cell.column.Header === "Section") {
                       data = (
@@ -168,7 +174,7 @@ function TableSections(props) {
                     return (
                       <Td
                         {...cell.getCellProps()}
-                        key={index}
+                        key={cell.column.id}
                         fontSize={{ sm: "14px" }}
                         minW={{ sm: "150px", md: "200px", lg: "auto" }}
                         borderColor="transparent"
@@ -182,6 +188,54 @@ function TableSections(props) {
             })}
           </Tbody>
         </Table>
+        <Flex justify="space-between" alignItems="center" m={4}>
+          <Flex>
+            <Button onClick={() => gotoPage(0)} disabled={!canPreviousPage} mr={2}>
+              {"<<"}
+            </Button>
+            <Button onClick={() => previousPage()} disabled={!canPreviousPage} mr={2}>
+              {"<"}
+            </Button>
+            <Button onClick={() => nextPage()} disabled={!canNextPage} mr={2}>
+              {">"}
+            </Button>
+            <Button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+              {">>"}
+            </Button>
+          </Flex>
+          <Box>
+            <Text>
+              Page{" "}
+              <strong>
+                {state.pageIndex + 1} of {pageOptions.length}
+              </strong>
+            </Text>
+          </Box>
+          <Flex alignItems="center">
+            <Text mr={2}>Go to page:</Text>
+            <Input
+              type="number"
+              defaultValue={state.pageIndex + 1}
+              onChange={(e) => {
+                const pageNumber = e.target.value ? Number(e.target.value) - 1 : 0;
+                gotoPage(pageNumber);
+              }}
+              width="50px"
+              mr={2}
+            />
+            <Select
+              value={state.pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              width="100px"
+            >
+              {[5, 10, 15, 20].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </Select>
+          </Flex>
+        </Flex>
       </Flex>
     </>
   );
