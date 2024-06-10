@@ -14,6 +14,8 @@ import {
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import SelectSections from '../sections/SelectSections';
 import api from 'api'; // Import API configuration for HTTP requests
 
@@ -48,10 +50,16 @@ const AddRepositoryModal = ({ isOpen, onClose, refresher }) => {
         sections: sections_id,
       });
       console.log(response); // Log the successful server response
+      toast.success('Repository added successfully!', {
+        position: 'bottom-center',
+      });
       onClose(); // Close the modal on successful save
       refresher((prev) => !prev); // Trigger a refresh of the parent component's data
     } catch (error) {
       console.error('Error saving repository:', error); // Log any errors encountered during save
+      toast.error('Error saving repository.', {
+        position: 'bottom-center',
+      });
     }
   };
 

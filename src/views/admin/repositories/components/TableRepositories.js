@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Avatar,
   Button,
   Flex,
   IconButton,
@@ -131,12 +130,6 @@ function TableRepositories({ columnsData, tableData, refresh, searchQuery }) {
                     if (cell.column.Header === "Repository Name") {
                       data = (
                         <Flex align="center">
-                          <Avatar
-                            src={cell.value[1]}
-                            w="30px"
-                            h="30px"
-                            me="8px"
-                          />
                           <Text color={textColor} fontSize="sm" fontWeight="600">
                             {cell.value}
                           </Text>

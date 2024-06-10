@@ -14,6 +14,8 @@ import {
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import api from 'api';
 import SelectSections from '../sections/SelectSections';
 
@@ -51,10 +53,16 @@ function UpdateRepositoryModal({ isOpen, onClose, repository, refresher }) {
         sections: selectedSections.map(sec => sec.value), // Only send section IDs to the backend
       });
       console.log(response);
+      toast.success('Repository updated successfully!', {
+        position: 'bottom-center',
+      });
       onClose();
       refresher((prev) => !prev);
     } catch (error) {
       console.error('Error updating repository:', error);
+      toast.error('Error updating repository.', {
+        position: 'bottom-center',
+      });
     }
   }
 

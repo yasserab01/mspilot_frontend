@@ -19,6 +19,9 @@ import {
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import { Formik, Form, Field, FieldArray } from 'formik';
 import * as Yup from 'yup';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import api from 'api';
 
 const validationSchema = Yup.object().shape({
@@ -46,10 +49,16 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
         subsections: values.subsections
       });
       console.log(response); // Log the response from the server
+      toast.success('Section added successfully!', {
+        position: 'bottom-center',
+      });
       onClose(); // Close the modal on successful save
       refresher((prev) => !prev); // Refresh the data in the parent component
     } catch (error) {
       console.error('Error saving section:', error);
+      toast.error('Error saving section.', {
+        position: 'bottom-center',
+      });
     } finally {
       setSubmitting(false);
     }

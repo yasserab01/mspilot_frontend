@@ -22,6 +22,8 @@ import {
   Box,
   Spinner
 } from "@chakra-ui/react";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import api from 'api';
 
 function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
@@ -174,17 +176,29 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
 
         const subsectionsResponse = await api.post(`/api/reports/${reportSelected?.id}/update-subsections-status/`, updatedSubsectionsStatus);
         if (subsectionsResponse.status === 200) {
+          toast.success('Report and subsections updated successfully!', {
+            position: 'bottom-center',
+          });
           onClose();
           refresher();
           resetForm();
         } else {
           console.error('Failed to update subsection status:', subsectionsResponse.data.message);
+          toast.error('Failed to update subsection status.', {
+            position: 'bottom-center',
+          });
         }
       } else {
         console.error('Failed to update report:', response.data.message);
+        toast.error('Failed to update report.', {
+          position: 'bottom-center',
+        });
       }
     } catch (error) {
       console.error('Error updating report and subsections:', error);
+      toast.error('Error updating report and subsections.', {
+        position: 'bottom-center',
+      });
     } finally {
       setIsLoading(false);
     }
