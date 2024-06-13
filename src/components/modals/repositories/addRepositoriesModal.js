@@ -28,7 +28,7 @@ const AddRepositoryModal = ({ isOpen, onClose, refresher }) => {
     const fetchSections = async () => {
       try {
         const response = await api.get('/api/sections/');
-        setSections(response.data); // Set the sections state with the fetched data
+        setSections(response.data.results); // Set the sections state with the fetched data
       } catch (error) {
         console.error('Error fetching sections:', error); // Log any errors during the fetch
       }

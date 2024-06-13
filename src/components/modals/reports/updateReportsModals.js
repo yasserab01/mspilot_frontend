@@ -72,7 +72,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
             subsectionStatusId: subsectionStatus.id || null,
             subsectionId: subsection.id,
             subsectionName: subsection.name,
-            status: subsectionStatus.status || 'applicable',
+            status: subsectionStatus.status,
             justification: subsectionStatus.justification || ''
           };
         });
@@ -96,11 +96,11 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
         api.get(`/api/reports/${reportSelected.id}/`),
       ]);
 
-      setSelectedCompany(companyRes.data?.id || '');
-      setCompanies(allCompanies.data || []);
-      setSelectedRepository(repositoryRes.data?.id || '');
-      setRepositories(allRepositories.data || []);
-      setReport(reportRes.data || {});
+      setSelectedCompany(companyRes.data?.id);
+      setCompanies(allCompanies.data);
+      setSelectedRepository(repositoryRes.data?.id);
+      setRepositories(allRepositories.data.results);
+      setReport(reportRes.data.results);
 
       await fetchSections(repositoryRes.data.sections);
       await initializeSubsectionStates(repositoryRes.data.sections);
@@ -257,8 +257,8 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
                             <Td>{subsectionName}</Td>
                             <Td>
                               <Select value={status} onChange={(e) => handleStatusChange(id, e.target.value)}>
-                                <option value="applicable">Applicable</option>
-                                <option value="not_applicable">Not Applicable</option>
+                                <option value="Applicable">Applicable</option>
+                                <option value="Non-Applicable">Not Applicable</option>
                               </Select>
                             </Td>
                             <Td>

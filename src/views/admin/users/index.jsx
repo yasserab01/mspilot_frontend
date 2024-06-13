@@ -13,8 +13,7 @@ export default function Users(props) {
   const fetchUsers = useCallback(async () => {
     try {
       const response = await api.get("/api/users/"); // Make sure the endpoint is correct
-      setUsers(response.data); // Update state with fetched data
-      console.log(response.data); // Log the fetched data
+      setUsers(response.data.results); // Update state with fetched data
     } catch (error) {
       console.error("Failed to fetch users:", error); // Error handling
     }

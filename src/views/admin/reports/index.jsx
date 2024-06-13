@@ -21,15 +21,20 @@ export default function Reports(props) {
     const fetchReports = async () => {
       try {
         const response = await api.get("/api/reports/");
-        setReports(response.data); // Update state with fetched data
-        console.log(response.data); // Log the fetched data
+        const data = response.data.results;
+        console.log('Fetched data:', data); // Log the fetched data
+        setReports(data); // Set the state data to the fetched data
       } catch (error) {
         console.error("Failed to fetch Reports:", error);
       }
     };
 
     fetchReports();
-  }, [refresh]); // Refresh dependency array to trigger re-fetch on state change
+  }, [refresh]); // Refresh dependency array to trigger re-fetch on state chang
+
+  useEffect(() => {
+    console.log('Reports:', reports); // Log the state data whenever it changes
+  }, [reports]); // Dependency array to trigger re-run on state change
 
   return (
     <Box pt={{ base: "180px", md: "80px", xl: "80px" }}>
@@ -39,7 +44,7 @@ export default function Reports(props) {
             <TableReports
               tableData={reports} // Pass state data to TableReports component
               columnsData={tableColumnsReports} // Pass columns data to TableReports component
-              refresh={setRefresh} // Pass state setter function to TableReports component
+              refresh={setRefresh} // Pass state setter function to TableReports com  ponent
               searchQuery={searchQuery} // Pass search query to TableReports component
             />
           </Card>

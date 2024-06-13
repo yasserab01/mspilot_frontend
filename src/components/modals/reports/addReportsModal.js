@@ -51,17 +51,21 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
           api.get('/api/companies/'),
           api.get('/api/repositories/')
         ]);
-        setCompanies(companyRes.data);
-        setRepositories(repoRes.data);
+        setCompanies(Array.isArray(companyRes.data) ? companyRes.data : []);
+        setRepositories(Array.isArray(repoRes.data.results) ? repoRes.data.results : []);
       } catch (error) {
         console.error('Error fetching data:', error);
+        setCompanies([]);
+        setRepositories([]);
       } finally {
         setIsFetching(false);
       }
-    }
+    };
 
-    fetchCompaniesAndRepositories();
-  }, []);
+    if (isOpen) {
+      fetchCompaniesAndRepositories();
+    }
+  }, [isOpen]);
 
   const handleCompanyChange = (e) => {
     setSelectedCompany(e.target.value);
@@ -78,6 +82,7 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
         data.sections.map(sectionId => api.get(`/api/sections/${sectionId}/`))
       );
       setSections(sectionsData.map(sectionRes => sectionRes.data));
+      console.log(sectionsData.map(sectionRes => sectionRes.data)); // Log sections data
       await initializeSubsectionStates(data.sections);
     } catch (error) {
       console.error('Error fetching sections:', error);
@@ -210,7 +215,7 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
                   ))}
                 </Select>
               </FormControl>
-              {sections.map((section) => (
+              {sections.length > 0 && sections.map((section) => (
                 <Box key={section.id}>
                   <Text fontSize="lg" fontWeight="bold" mt={4}>{section.name}</Text>
                   <Table size="sm">
