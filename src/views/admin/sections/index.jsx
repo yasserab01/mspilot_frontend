@@ -13,7 +13,7 @@ export default function Sections({ searchQuery }) {
     const fetchSections = async () => {
       try {
         const response = await api.get("/api/sections/"); // Ensure the endpoint is correct
-        setSections(response.data.results); // Update state with fetched data
+        setSections(response.data); // Update state with fetched data
         console.log(response.data);
       } catch (error) {
         console.error("Error fetching sections:", error); // Improved error message

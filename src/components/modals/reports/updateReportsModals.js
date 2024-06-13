@@ -99,8 +99,8 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
       setSelectedCompany(companyRes.data?.id);
       setCompanies(allCompanies.data);
       setSelectedRepository(repositoryRes.data?.id);
-      setRepositories(allRepositories.data.results);
-      setReport(reportRes.data.results);
+      setRepositories(allRepositories.data);
+      setReport(reportRes.data);
 
       await fetchSections(repositoryRes.data.sections);
       await initializeSubsectionStates(repositoryRes.data.sections);

@@ -34,6 +34,7 @@ import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
 const TableUsers = ({ columnsData, tableData, refresh, searchQuery }) => {
   const columns = useMemo(() => columnsData, [columnsData]);
   const data = useMemo(() => (Array.isArray(tableData) ? tableData : []), [tableData]);
+  console.log(data);
 
   const [currentUser, setCurrentUser] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

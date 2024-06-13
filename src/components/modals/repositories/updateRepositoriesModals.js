@@ -27,11 +27,11 @@ function UpdateRepositoryModal({ isOpen, onClose, repository, refresher }) {
     const fetchSections = async () => {
       try {
         const response = await api.get('/api/sections/');
-        setSections(response.data.results);
+        setSections(response.data);
         if (repository) {
           // Transform the initial selected sections from the repository to match the select component format
           const initialSections = repository.sections;
-          setSelectedSections(response.data.results.filter(sec => initialSections.includes(sec.id)).map(sec => ({ value: sec.id, label: sec.name })));
+          setSelectedSections(response.data.filter(sec => initialSections.includes(sec.id)).map(sec => ({ value: sec.id, label: sec.name })));
         }
       } catch (error) {
         console.error('Error fetching sections:', error);

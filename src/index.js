@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import 'assets/css/App.css';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import AuthLayout from 'layouts/auth';
@@ -12,10 +12,7 @@ import { UserProvider } from './contexts/UserContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Create a root and render your App component
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(
+ReactDOM.render(
   <ChakraProvider theme={theme}>
     <React.StrictMode>
       <ThemeEditorProvider>
@@ -28,10 +25,11 @@ root.render(
               </ProtectedRoute>
               <Redirect from="/" to="/admin" />
             </Switch>
-            <ToastContainer />
           </BrowserRouter>
+          <ToastContainer />
         </UserProvider>
       </ThemeEditorProvider>
     </React.StrictMode>
-  </ChakraProvider>
+  </ChakraProvider>,
+  document.getElementById('root')
 );

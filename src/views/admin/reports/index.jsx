@@ -21,7 +21,7 @@ export default function Reports(props) {
     const fetchReports = async () => {
       try {
         const response = await api.get("/api/reports/");
-        const data = response.data.results;
+        const data = response.data;
         console.log('Fetched data:', data); // Log the fetched data
         setReports(data); // Set the state data to the fetched data
       } catch (error) {

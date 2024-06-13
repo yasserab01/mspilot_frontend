@@ -36,11 +36,13 @@ function AddUserModal({ isOpen, onClose, refresher }) {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
     try {
+      console.log(values);
       const response = await api.post('/api/users/', values, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
+      console.log(response);
       if (response.status !== 201) {
         throw new Error('Error saving user');
       }

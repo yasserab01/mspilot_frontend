@@ -48,9 +48,9 @@ function TableReports({ columnsData, tableData, refresh, searchQuery }) {
           api.get('/api/companies/'),
           api.get('/api/repositories/')
         ]);
-        console.log('Repositories:', repositoriesResponse.data.results);
+        console.log('Repositories:', repositoriesResponse.data);
         setCompanies(companiesResponse.data);
-        setRepositories(repositoriesResponse.data.results);
+        setRepositories(repositoriesResponse.data);
       } catch (error) {
         console.error('Error fetching companies or repositories:', error);
       }

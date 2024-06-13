@@ -52,7 +52,7 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
           api.get('/api/repositories/')
         ]);
         setCompanies(Array.isArray(companyRes.data) ? companyRes.data : []);
-        setRepositories(Array.isArray(repoRes.data.results) ? repoRes.data.results : []);
+        setRepositories(Array.isArray(repoRes.data) ? repoRes.data : []);
       } catch (error) {
         console.error('Error fetching data:', error);
         setCompanies([]);
@@ -236,8 +236,8 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
                             <Td>{subsectionName}</Td>
                             <Td>
                               <Select value={status} onChange={(e) => handleStatusChange(subsectionId, e.target.value)}>
-                                <option value="applicable">Applicable</option>
-                                <option value="not_applicable">Not Applicable</option>
+                                <option value="Applicable">Applicable</option>
+                                <option value="Non-Applicable">Not Applicable</option>
                               </Select>
                             </Td>
                             <Td>
