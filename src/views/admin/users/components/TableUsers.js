@@ -140,12 +140,12 @@ const TableUsers = ({ columnsData, tableData, refresh, searchQuery }) => {
         <Table {...getTableProps()} variant="simple" color="gray.500">
           <Thead>
             {headerGroups.map((headerGroup) => (
-              <Tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
+              <Tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id || headerGroup.getHeaderGroupProps().key}>
                 {headerGroup.headers.map((column) => (
                   <Th
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     pe="10px"
-                    key={column.id}
+                    key={column.id || column.getHeaderProps().key}
                     borderColor="transparent"
                   >
                     <Flex
@@ -165,7 +165,7 @@ const TableUsers = ({ columnsData, tableData, refresh, searchQuery }) => {
             {page.map((row) => {
               prepareRow(row);
               return (
-                <Tr {...row.getRowProps()} key={row.id}>
+                <Tr {...row.getRowProps()} key={row.id || row.getRowProps().key}>
                   {row.cells.map((cell) => {
                     let cellContent;
                     if (cell.column.Header === "Profile Image") {
@@ -226,7 +226,7 @@ const TableUsers = ({ columnsData, tableData, refresh, searchQuery }) => {
                     return (
                       <Td
                         {...cell.getCellProps()}
-                        key={cell.column.id}
+                        key={cell.column.id || cell.getCellProps().key}
                         fontSize={{ sm: "14px" }}
                         minW={{ sm: "150px", md: "200px", lg: "auto" }}
                         borderColor="transparent"
