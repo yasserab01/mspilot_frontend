@@ -12,7 +12,8 @@ import {
   FormLabel,
   Input,
   Spinner,
-  Text
+  Text,
+  useColorModeValue
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
@@ -62,11 +63,14 @@ function AddUserModal({ isOpen, onClose, refresher }) {
     }
   };
 
+  const textColor = useColorModeValue("navy.700", "white");
+  const inputTextColor = useColorModeValue("black", "white");
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Add New User</ModalHeader>
+        <ModalHeader color={textColor}>Add New User</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Formik
@@ -77,22 +81,22 @@ function AddUserModal({ isOpen, onClose, refresher }) {
             {({ isSubmitting, errors, touched }) => (
               <Form>
                 <FormControl isInvalid={errors.username && touched.username}>
-                  <FormLabel>Username</FormLabel>
-                  <Field as={Input} name="username" placeholder="Username" />
+                  <FormLabel color={textColor}>Username</FormLabel>
+                  <Field as={Input} name="username" placeholder="Username" color={inputTextColor} />
                   {errors.username && touched.username && (
                     <Text color="red.500">{errors.username}</Text>
                   )}
                 </FormControl>
                 <FormControl isInvalid={errors.email && touched.email} mt={4}>
-                  <FormLabel>Email</FormLabel>
-                  <Field as={Input} name="email" placeholder="Email" />
+                  <FormLabel color={textColor}>Email</FormLabel>
+                  <Field as={Input} name="email" placeholder="Email" color={inputTextColor} />
                   {errors.email && touched.email && (
                     <Text color="red.500">{errors.email}</Text>
                   )}
                 </FormControl>
                 <FormControl isInvalid={errors.password && touched.password} mt={4}>
-                  <FormLabel>Password</FormLabel>
-                  <Field as={Input} type="password" name="password" placeholder="Password" />
+                  <FormLabel color={textColor}>Password</FormLabel>
+                  <Field as={Input} type="password" name="password" placeholder="Password" color={inputTextColor} />
                   {errors.password && touched.password && (
                     <Text color="red.500">{errors.password}</Text>
                   )}
@@ -101,7 +105,7 @@ function AddUserModal({ isOpen, onClose, refresher }) {
                   <Button colorScheme="blue" type="submit" mr={3} isLoading={isSubmitting}>
                     {isSubmitting ? <Spinner size="sm" /> : 'Save'}
                   </Button>
-                  <Button onClick={onClose}>Cancel</Button>
+                  <Button color={textColor} onClick={onClose}>Cancel</Button>
                 </ModalFooter>
               </Form>
             )}

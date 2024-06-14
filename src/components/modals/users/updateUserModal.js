@@ -13,14 +13,14 @@ import {
   Input,
   Image,
   Flex,
-  Spinner
+  Spinner,
+  useColorModeValue
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import api from 'api';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
-
 
 function UpdateUserModal({ isOpen, onClose, user, refresher }) {
   const fileInputRef = useRef(null);
@@ -92,56 +92,58 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
       setIsLoading(false);
     }
   };
-  
 
   const openFileSelector = () => {
     fileInputRef.current.click();
   };
 
+  const textColor = useColorModeValue("navy.700", "white");
+  const inputTextColor = useColorModeValue("black", "white");
+
   if (!user) return null;
 
   return (
     <>
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent>
-        <Flex justifyContent="center" mt="20px">
-          <Image
-            borderRadius="full"
-            boxSize="150px"
-            src={imagePreview}
-            alt={user?.username || 'User'}
-          />
-        </Flex>
-        <ModalHeader>Update User</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <FormControl>
-            <FormLabel>Username</FormLabel>
-            <Input placeholder="Username" value={username} onChange={handleUsernameChange} />
-            <FormLabel mt={4}>Email</FormLabel>
-            <Input placeholder="Email" value={email} onChange={handleEmailChange} />
-            <FormLabel mt={4}>Photo</FormLabel>
-            <Input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              hidden
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <Flex justifyContent="center" mt="20px">
+            <Image
+              borderRadius="full"
+              boxSize="150px"
+              src={imagePreview}
+              alt={user?.username || 'User'}
             />
-            <Button leftIcon={<AddIcon />} onClick={openFileSelector} w="full" mt="2">
-              Upload Photo
+          </Flex>
+          <ModalHeader color={textColor}>Update User</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <FormLabel color={textColor}>Username</FormLabel>
+              <Input placeholder="Username" value={username} onChange={handleUsernameChange} color={inputTextColor} />
+              <FormLabel mt={4} color={textColor}>Email</FormLabel>
+              <Input placeholder="Email" value={email} onChange={handleEmailChange} color={inputTextColor} />
+              <FormLabel mt={4} color={textColor}>Photo</FormLabel>
+              <Input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                hidden
+              />
+              <Button leftIcon={<AddIcon />} onClick={openFileSelector} w="full" mt="2">
+                Upload Photo
+              </Button>
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleSubmit} isLoading={isLoading}>
+              {isLoading ? <Spinner size="sm" /> : 'Save'}
             </Button>
-          </FormControl>
-        </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleSubmit} isLoading={isLoading}>
-            {isLoading ? <Spinner size="sm" /> : 'Save'}
-          </Button>
-          <Button onClick={onClose}>Cancel</Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
-    <ToastContainer />
+            <Button color={textColor} onClick={onClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <ToastContainer />
     </>
   );
 }

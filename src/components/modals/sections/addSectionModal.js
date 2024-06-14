@@ -14,7 +14,8 @@ import {
   IconButton,
   VStack,
   Text,
-  Box
+  Box,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import { Formik, Form, Field, FieldArray } from 'formik';
@@ -64,11 +65,14 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
     }
   };
 
+  const textColor = useColorModeValue("navy.700", "white");
+  const inputTextColor = useColorModeValue("black", "white");
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Add New Section</ModalHeader>
+        <ModalHeader color={textColor}>Add New Section</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Formik
@@ -79,7 +83,7 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
             {({ values, handleChange, handleBlur, errors, touched, isSubmitting }) => (
               <Form>
                 <FormControl>
-                  <FormLabel>Id</FormLabel>
+                  <FormLabel color={textColor}>Id</FormLabel>
                   <Field
                     as={Input}
                     name="id"
@@ -87,11 +91,12 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values.id}
+                    color={inputTextColor}
                   />
                   {errors.id && touched.id && (
                     <Text color="red.500">{errors.id}</Text>
                   )}
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel color={textColor}>Name</FormLabel>
                   <Field
                     as={Input}
                     name="name"
@@ -99,12 +104,13 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values.name}
+                    color={inputTextColor}
                   />
                   {errors.name && touched.name && (
                     <Text color="red.500">{errors.name}</Text>
                   )}
                 </FormControl>
-                <FormLabel mt={4}>Subsections</FormLabel>
+                <FormLabel mt={4} color={textColor}>Subsections</FormLabel>
                 <FieldArray name="subsections">
                   {({ push, remove }) => (
                     <VStack mt={4} spacing={4}>
@@ -118,6 +124,7 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
                               onChange={handleChange}
                               onBlur={handleBlur}
                               value={subsection.name}
+                              color={inputTextColor}
                             />
                             <IconButton
                               icon={<DeleteIcon />}
@@ -138,7 +145,7 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
                 </FieldArray>
                 <ModalFooter>
                   <Button colorScheme="blue" type="submit" mr={3} isLoading={isSubmitting}>Save</Button>
-                  <Button onClick={onClose}>Cancel</Button>
+                  <Button color={textColor} onClick={onClose}>Cancel</Button>
                 </ModalFooter>
               </Form>
             )}

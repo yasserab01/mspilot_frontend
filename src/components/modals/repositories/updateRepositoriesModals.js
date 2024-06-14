@@ -11,6 +11,8 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
@@ -66,13 +68,17 @@ function UpdateRepositoryModal({ isOpen, onClose, repository, refresher }) {
     }
   }
 
+  const textColor = useColorModeValue("navy.700", "white");
+  const inputTextColor = useColorModeValue("black", "white");
+
   if (!repository) return null;
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Update Repository</ModalHeader>
+        <ModalHeader color={textColor}>Update Repository</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Formik
@@ -84,10 +90,10 @@ function UpdateRepositoryModal({ isOpen, onClose, repository, refresher }) {
             {({ errors, touched }) => (
               <Form>
                 <FormControl>
-                  <FormLabel>Name</FormLabel>
-                  <Field as={Input} name="name" placeholder="Enter repository name" />
+                  <FormLabel color={textColor}>Name</FormLabel>
+                  <Field as={Input} name="name" placeholder="Enter repository name" color={inputTextColor} />
                   {errors.name && touched.name ? (
-                    <div style={{ color: 'red' }}>{errors.name}</div>
+                    <Text color="red.500">{errors.name}</Text>
                   ) : null}
                 </FormControl>
                 <SelectSections
@@ -97,7 +103,7 @@ function UpdateRepositoryModal({ isOpen, onClose, repository, refresher }) {
                 />
                 <ModalFooter>
                   <Button colorScheme="blue" mr={3} type="submit">Save</Button>
-                  <Button onClick={onClose}>Cancel</Button>
+                  <Button color={textColor} onClick={onClose}>Cancel</Button>
                 </ModalFooter>
               </Form>
             )}

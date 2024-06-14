@@ -20,7 +20,8 @@ import {
   Th,
   Td,
   Box,
-  Spinner
+  Spinner,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -36,6 +37,9 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
   const [subsectionsStatus, setSubsectionsStatus] = useState({});
   const [isFetching, setIsFetching] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const textColor = useColorModeValue("navy.700", "white");
+  const inputTextColor = useColorModeValue("black", "white");
 
   const resetForm = () => {
     setSelectedCompany('');
@@ -215,7 +219,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
     <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalOverlay />
       <ModalContent maxWidth="90vw" width="90vw">
-        <ModalHeader>Update Report</ModalHeader>
+        <ModalHeader color={textColor}>Update Report</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {isFetching ? (
@@ -223,7 +227,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
           ) : (
             <>
               <FormControl>
-                <FormLabel>Company</FormLabel>
+                <FormLabel color={textColor}>Company</FormLabel>
                 <Select value={selectedCompany} onChange={handleCompanyChange}>
                   {companies.map((company) => (
                     <option key={company.id} value={company.id}>{company.name}</option>
@@ -231,7 +235,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
                 </Select>
               </FormControl>
               <FormControl mt={4}>
-                <FormLabel>Repository</FormLabel>
+                <FormLabel color={textColor}>Repository</FormLabel>
                 <Select value={selectedRepository} onChange={handleRepositoryChange}>
                   {repositories.map((repo) => (
                     <option key={repo.id} value={repo.id}>{repo.name}</option>
@@ -240,7 +244,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
               </FormControl>
               {sections.map((section) => (
                 <Box key={section.id}>
-                  <Text fontSize="lg" fontWeight="bold" mt={4}>{section.name}</Text>
+                  <Text fontSize="lg" fontWeight="bold" mt={4} color={textColor}>{section.name}</Text>
                   <Table size="sm">
                     <Thead>
                       <Tr>
@@ -262,7 +266,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
                               </Select>
                             </Td>
                             <Td>
-                              <Textarea value={justification} onChange={(e) => handleJustificationChange(id, e.target.value)} />
+                              <Textarea value={justification} onChange={(e) => handleJustificationChange(id, e.target.value)} color={inputTextColor} />
                             </Td>
                           </Tr>
                         ))}
@@ -275,7 +279,7 @@ function UpdateReportsModal({ isOpen, onClose, reportSelected, refresher }) {
         </ModalBody>
         <ModalFooter>
           <Button colorScheme="blue" mr={3} onClick={handleSubmit} isLoading={isLoading}>Save Changes</Button>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button color={textColor} onClick={handleClose}>Cancel</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

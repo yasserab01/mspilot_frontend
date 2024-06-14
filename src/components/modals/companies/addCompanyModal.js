@@ -10,7 +10,9 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Input
+  Input,
+  Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -43,11 +45,14 @@ const AddCompanyModal = ({ isOpen, onClose, refresher }) => {
     }
   };
 
+  const textColor = useColorModeValue("navy.700", "white");
+  const inputTextColor = useColorModeValue("black", "white");
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Add New Company</ModalHeader>
+        <ModalHeader color={textColor}>Add New Company</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Formik
@@ -58,20 +63,21 @@ const AddCompanyModal = ({ isOpen, onClose, refresher }) => {
             {({ isSubmitting }) => (
               <Form>
                 <FormControl>
-                  <FormLabel htmlFor="name">Name</FormLabel>
+                  <FormLabel htmlFor="name" color={textColor}>Name</FormLabel>
                   <Field
                     as={Input}
                     id="name"
                     name="name"
                     placeholder="Name"
+                    color={inputTextColor}
                   />
-                  <ErrorMessage name="name" component="div" style={{ color: 'red' }} />
+                  <ErrorMessage name="name" component={Text} color="red.500" />
                 </FormControl>
                 <ModalFooter>
                   <Button colorScheme="blue" type="submit" mr={3} isLoading={isSubmitting}>
                     Save
                   </Button>
-                  <Button onClick={onClose}>Cancel</Button>
+                  <Button color={textColor} onClick={onClose}>Cancel</Button>
                 </ModalFooter>
               </Form>
             )}

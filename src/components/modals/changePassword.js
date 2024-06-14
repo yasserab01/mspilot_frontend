@@ -12,7 +12,8 @@ import {
   FormLabel,
   Input,
   Spinner,
-  Text
+  Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
@@ -81,11 +82,14 @@ function ChangePasswordModal({ isOpen, onClose, refresher }) {
     }
   };
 
+  const textColor = useColorModeValue("navy.700", "white");
+  const inputTextColor = useColorModeValue("black", "white");
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Change Password</ModalHeader>
+        <ModalHeader color={textColor}>Change Password</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Formik
@@ -96,15 +100,15 @@ function ChangePasswordModal({ isOpen, onClose, refresher }) {
             {({ isSubmitting, errors, touched }) => (
               <Form>
                 <FormControl isInvalid={errors.old_password && touched.old_password} mt={4}>
-                  <FormLabel>Old Password</FormLabel>
-                  <Field as={Input} type="password" name="old_password" placeholder="Old Password" />
+                  <FormLabel color={textColor}>Old Password</FormLabel>
+                  <Field as={Input} type="password" name="old_password" placeholder="Old Password" color={inputTextColor} />
                   {errors.old_password && touched.old_password && (
                     <Text color="red.500">{errors.old_password}</Text>
                   )}
                 </FormControl>
                 <FormControl isInvalid={errors.new_password && touched.new_password} mt={4}>
-                  <FormLabel>New Password</FormLabel>
-                  <Field as={Input} type="password" name="new_password" placeholder="New Password" />
+                  <FormLabel color={textColor}>New Password</FormLabel>
+                  <Field as={Input} type="password" name="new_password" placeholder="New Password" color={inputTextColor} />
                   {errors.new_password && touched.new_password && (
                     <Text color="red.500">{errors.new_password}</Text>
                   )}
@@ -113,7 +117,7 @@ function ChangePasswordModal({ isOpen, onClose, refresher }) {
                   <Button colorScheme="blue" type="submit" mr={3} isLoading={isSubmitting}>
                     {isSubmitting ? <Spinner size="sm" /> : 'Save'}
                   </Button>
-                  <Button onClick={onClose}>Cancel</Button>
+                  <Button color={textColor} onClick={onClose}>Cancel</Button>
                 </ModalFooter>
               </Form>
             )}

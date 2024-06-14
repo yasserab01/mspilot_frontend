@@ -138,8 +138,8 @@ export default function HeaderLinks({ secondary, searchQuery, handleSearch }) {
                                 👋&nbsp; Hey, {user?.username || 'Guest'}
                             </Text>
                         </Flex>
-                        <ProfileMenuItem onClick={handleChangePasswordModal} text="Change Password" />
-                        <ProfileMenuItem onClick={handleModalOpen} text="Profile settings" />
+                        <ProfileMenuItem onClick={handleChangePasswordModal} color={textColor} text="Change Password" />
+                        <ProfileMenuItem onClick={handleModalOpen} color={textColor} text="Profile settings" />
                         <ProfileMenuItem onClick={logout} text="Log out" color="red.400" />
                     </MenuList>
                 </Menu>
@@ -151,15 +151,14 @@ export default function HeaderLinks({ secondary, searchQuery, handleSearch }) {
                     user={user}
                     refresher={setRefresher}
                 />
-
             )}
             {user && (
-            <ChangePasswordModal
-                isOpen={isChangePasswordModalOpen}
-                onClose={handleModalClose}
-                user={user}
-                refresher={setRefresher}
-            />
+                <ChangePasswordModal
+                    isOpen={isChangePasswordModalOpen}
+                    onClose={handleModalClose}
+                    user={user}
+                    refresher={setRefresher}
+                />
             )}
         </>
     );
@@ -170,4 +169,3 @@ HeaderLinks.propTypes = {
     searchQuery: PropTypes.string,
     handleSearch: PropTypes.func
 };
-

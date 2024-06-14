@@ -11,6 +11,8 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
@@ -63,11 +65,14 @@ const AddRepositoryModal = ({ isOpen, onClose, refresher }) => {
     }
   };
 
+  const textColor = useColorModeValue("navy.700", "white");
+  const inputTextColor = useColorModeValue("black", "white");
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Add New Repository</ModalHeader>
+        <ModalHeader color={textColor}>Add New Repository</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Formik
@@ -78,10 +83,10 @@ const AddRepositoryModal = ({ isOpen, onClose, refresher }) => {
             {({ errors, touched }) => (
               <Form>
                 <FormControl>
-                  <FormLabel>Name</FormLabel>
-                  <Field as={Input} name="name" placeholder="Name" />
+                  <FormLabel color={textColor}>Name</FormLabel>
+                  <Field as={Input} name="name" placeholder="Name" color={inputTextColor} />
                   {errors.name && touched.name ? (
-                    <div style={{ color: 'red' }}>{errors.name}</div>
+                    <Text color="red.500">{errors.name}</Text>
                   ) : null}
                 </FormControl>
                 <SelectSections
@@ -91,7 +96,7 @@ const AddRepositoryModal = ({ isOpen, onClose, refresher }) => {
                 />
                 <ModalFooter>
                   <Button colorScheme="blue" type="submit" mr={3}>Save</Button>
-                  <Button onClick={onClose}>Cancel</Button>
+                  <Button color={textColor} onClick={onClose}>Cancel</Button>
                 </ModalFooter>
               </Form>
             )}

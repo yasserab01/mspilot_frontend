@@ -14,7 +14,8 @@ import {
   IconButton,
   VStack,
   Text,
-  Box
+  Box,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { DeleteIcon, AddIcon } from "@chakra-ui/icons";
 import { Formik, Form, Field, FieldArray } from 'formik';
@@ -80,13 +81,17 @@ function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
     }
   };
 
+  const textColor = useColorModeValue("navy.700", "white");
+  const inputTextColor = useColorModeValue("black", "white");
+  
   if (!section) return null;
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Update Section</ModalHeader>
+        <ModalHeader color={textColor}>Update Section</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Formik
@@ -98,7 +103,7 @@ function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
             {({ values, handleChange, handleBlur, errors, touched }) => (
               <Form>
                 <FormControl>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel color={textColor}>Name</FormLabel>
                   <Field
                     as={Input}
                     name="name"
@@ -106,12 +111,13 @@ function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values.name}
+                    color={inputTextColor}
                   />
                   {errors.name && touched.name && (
                     <Text color="red.500">{errors.name}</Text>
                   )}
                 </FormControl>
-                <FormLabel mt={4}>Subsections</FormLabel>
+                <FormLabel mt={4} color={textColor}>Subsections</FormLabel>
                 <FieldArray name="subsections">
                   {({ push, remove }) => (
                     <VStack mt={4} spacing={4}>
@@ -125,6 +131,7 @@ function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
                               onChange={handleChange}
                               onBlur={handleBlur}
                               value={sub.name}
+                              color={inputTextColor}
                             />
                             <IconButton
                               icon={<DeleteIcon />}
@@ -147,7 +154,7 @@ function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
                 </FieldArray>
                 <ModalFooter>
                   <Button colorScheme="blue" mr={3} type="submit" isLoading={isLoading}>Save</Button>
-                  <Button onClick={onClose}>Cancel</Button>
+                  <Button color={textColor} onClick={onClose}>Cancel</Button>
                 </ModalFooter>
               </Form>
             )}
