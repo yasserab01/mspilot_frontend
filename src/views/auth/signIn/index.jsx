@@ -1,10 +1,9 @@
 import React, { useContext, useState } from "react";
 import { UserContext } from "contexts/UserContext";
-import { NavLink, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import {
   Box,
   Button,
-  Checkbox,
   Flex,
   FormControl,
   FormLabel,
@@ -27,7 +26,6 @@ function SignIn() {
   const { setUser, fetchUser } = useContext(UserContext);
   const textColor = useColorModeValue("navy.700", "white");
   const textColorSecondary = "gray.400";
-  const textColorBrand = useColorModeValue("brand.500", "white");
   const brandStars = useColorModeValue("brand.500", "brand.400");
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -127,6 +125,7 @@ function SignIn() {
               fontWeight="500"
               size="lg"
               onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
               value={username}
             />
             <FormLabel
@@ -142,7 +141,7 @@ function SignIn() {
               <Input
                 isRequired
                 fontSize="sm"
-                placeholder="Min. 8 characters"
+                placeholder="Min. 6 characters"
                 mb="24px"
                 size="lg"
                 type={show ? "text" : "password"}
@@ -159,34 +158,6 @@ function SignIn() {
                 />
               </InputRightElement>
             </InputGroup>
-            <Flex justifyContent="space-between" align="center" mb="24px">
-              <FormControl display="flex" alignItems="center">
-                <Checkbox
-                  id="remember-login"
-                  colorScheme="brandScheme"
-                  me="10px"
-                />
-                <FormLabel
-                  htmlFor="remember-login"
-                  mb="0"
-                  fontWeight="normal"
-                  color={textColor}
-                  fontSize="sm"
-                >
-                  Keep me logged in
-                </FormLabel>
-              </FormControl>
-              <NavLink to="/auth/forgot-password">
-                <Text
-                  color={textColorBrand}
-                  fontSize="sm"
-                  w="124px"
-                  fontWeight="500"
-                >
-                  Forgot password?
-                </Text>
-              </NavLink>
-            </Flex>
             <Button
               fontSize="sm"
               variant="brand"

@@ -1,5 +1,5 @@
 // Chakra Imports
-import { Box, Breadcrumb, BreadcrumbItem, BreadcrumbLink, Flex, Link, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, Breadcrumb, BreadcrumbItem, BreadcrumbLink, Flex, Link, useColorModeValue } from '@chakra-ui/react';
 import PropTypes from 'prop-types';
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminNavbarLinks from 'components/navbar/NavbarLinksAdmin';
@@ -7,7 +7,7 @@ import AdminNavbarLinks from 'components/navbar/NavbarLinksAdmin';
 export default function AdminNavbar(props) {
 	const [scrolled, setScrolled] = useState(false);
 
-	const { secondary, message, brandText, searchQuery, handleSearch } = props;
+	const { secondary, brandText, searchQuery, handleSearch } = props;
 
 	// Change navbar on scroll
 	const changeNavbar = useCallback(() => {
@@ -117,7 +117,6 @@ export default function AdminNavbar(props) {
 					/>
 				</Box>
 			</Flex>
-			{secondary && <Text color="white">{message}</Text>}
 		</Box>
 	);
 }
@@ -128,7 +127,6 @@ AdminNavbar.propTypes = {
 	secondary: PropTypes.bool,
 	fixed: PropTypes.bool,
 	onOpen: PropTypes.func,
-	message: PropTypes.string,
 	searchQuery: PropTypes.string,
 	handleSearch: PropTypes.func,
 	logoText: PropTypes.string,

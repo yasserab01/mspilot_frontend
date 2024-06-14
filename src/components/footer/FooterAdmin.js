@@ -32,7 +32,7 @@ export default function Footer() {
         {" "}
         &copy; {new Date().getFullYear()}
         <Text as='span' fontWeight='500' ms='4px'>
-          Symolias. All Rights Reserved.
+          Symolia. All Rights Reserved.
         </Text>
       </Text>
     </Flex>
