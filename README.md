@@ -4,7 +4,7 @@
 - Yarn
 
 ## Installation
-git clone https://github.com/yasserab01/mspilot_f.git
+git clone https://github.com/yasserab01/mspilot_frontend.git
 
 ## Installez les dépendances 
 cd mspilot_f
