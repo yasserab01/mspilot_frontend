@@ -1,6 +1,6 @@
 ## Prérequis
 
-- Node.js (version 12 ou supérieure)
+- Node.js
 - Yarn
 
 ## Installation
