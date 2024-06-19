@@ -8,6 +8,7 @@ git clone https://github.com/yasserab01/mspilot_f.git
 
 ## Installez les dépendances 
 cd mspilot_f
+
 yarn install
 
 ## Démarrage
