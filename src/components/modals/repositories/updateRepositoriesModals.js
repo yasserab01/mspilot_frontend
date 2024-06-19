@@ -56,14 +56,14 @@ function UpdateRepositoryModal({ isOpen, onClose, repository, refresher }) {
       });
       console.log(response);
       toast.success('Repository updated successfully!', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
       onClose();
       refresher((prev) => !prev);
     } catch (error) {
       console.error('Error updating repository:', error);
       toast.error('Error updating repository.', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
     }
   }

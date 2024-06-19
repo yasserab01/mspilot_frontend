@@ -12,7 +12,6 @@ import {
   Spinner
 } from '@chakra-ui/react';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 function DeleteConfirmationModal({ isOpen, onClose, onConfirm, userName }) {
   const [isLoading, setIsLoading] = useState(false);

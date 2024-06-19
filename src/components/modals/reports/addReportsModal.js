@@ -24,7 +24,6 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import api from 'api';
 
 function AddReportsModal({ isOpen, onClose, refresher }) {
@@ -157,7 +156,7 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
         const subsectionsResponse = await api.post(`/api/reports/${reportId}/subsections/`, { subsections: subsectionsData });
         if (subsectionsResponse.status === 201 || subsectionsResponse.status === 200) {
           toast.success('Report and subsections added successfully!', {
-            position: 'bottom-center',
+            position: 'top-center',
           });
           onClose();
           refresher(prev => !prev);
@@ -165,19 +164,19 @@ function AddReportsModal({ isOpen, onClose, refresher }) {
         } else {
           console.error('Failed to create subsection status:', subsectionsResponse.data.message);
           toast.error('Failed to create subsection status.', {
-            position: 'bottom-center',
+            position: 'top-center',
           });
         }
       } else {
         console.error('Failed to create report:', response.data.message);
         toast.error('Failed to create report.', {
-          position: 'bottom-center',
+          position: 'top-center',
         });
       }
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Error submitting form.', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
     } finally {
       setIsLoading(false);

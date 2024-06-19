@@ -29,6 +29,7 @@ import api from "api";
 import DeleteConfirmationModal from "components/modals/confirmDeleteModal";
 import AddReportsModal from "components/modals/reports/addReportsModal";
 import UpdateReportsModal from "components/modals/reports/updateReportsModals";
+import DownloadReportModal from "components/modals/DownloadReportModal";
 
 function TableReports({ columnsData, tableData, refresh, searchQuery }) {
   const columns = useMemo(() => columnsData, [columnsData]);
@@ -40,6 +41,8 @@ function TableReports({ columnsData, tableData, refresh, searchQuery }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [reportToDelete, setReportToDelete] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
+  const { isOpen: isDownloadOpen, onOpen: onDownloadOpen, onClose: onDownloadClose } = useDisclosure(); // For DownloadReportModal
+  const [reportToDownload, setReportToDownload] = useState(null); // State to track the report to download
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -100,17 +103,19 @@ function TableReports({ columnsData, tableData, refresh, searchQuery }) {
     setTableGlobalFilter(searchQuery || "");
   }, [searchQuery, setTableGlobalFilter]);
 
-  const handleReportDownload = async (report) => {
+  const handleReportDownload = async (fileName) => {
+    if (!reportToDownload) return;
+    
     try {
       const response = await api.post('/api/pdf-report/', {
-        report_id: report.id,
-        filename: `${report.name}.pdf`
+        report_id: reportToDownload.id,
+        filename: `${fileName}.pdf`
       }, { responseType: 'blob' });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${report.name}.pdf`);
+      link.setAttribute('download', `${fileName}.pdf`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -140,6 +145,11 @@ function TableReports({ columnsData, tableData, refresh, searchQuery }) {
     return repository ? repository.name : 'Unknown';
   }, [repositories]);
 
+  const handleDownloadClick = (report) => {
+    setReportToDownload(report);
+    onDownloadOpen();
+  };
+
   return (
     <>
       <AddReportsModal isOpen={isOpen} onClose={onClose} refresher={refresh} />
@@ -150,6 +160,7 @@ function TableReports({ columnsData, tableData, refresh, searchQuery }) {
         onConfirm={handleConfirmDelete}
         reportName={reportToDelete ? reportToDelete.name : ''}
       />
+      <DownloadReportModal isOpen={isDownloadOpen} onClose={onDownloadClose} onConfirm={handleReportDownload} />
       <Flex
         direction="column"
         w="100%"
@@ -219,7 +230,7 @@ function TableReports({ columnsData, tableData, refresh, searchQuery }) {
                           <IconButton
                             icon={<DownloadIcon />}
                             aria-label="Download"
-                            onClick={() => handleReportDownload(cell.row.original)}
+                            onClick={() => handleDownloadClick(cell.row.original)}
                             colorScheme="green"
                             ml="4"
                           />

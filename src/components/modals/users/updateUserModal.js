@@ -19,7 +19,6 @@ import {
 import { AddIcon } from "@chakra-ui/icons";
 import api from 'api';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 function UpdateUserModal({ isOpen, onClose, user, refresher }) {
@@ -78,7 +77,7 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
       console.log(response);
       
       toast.success('User updated successfully!', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
       
       onClose();
@@ -86,7 +85,7 @@ function UpdateUserModal({ isOpen, onClose, user, refresher }) {
     } catch (error) {
       console.error('Error saving user:', error);
       toast.error('Error saving user.', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
     } finally {
       setIsLoading(false);

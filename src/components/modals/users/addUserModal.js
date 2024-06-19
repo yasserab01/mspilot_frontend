@@ -19,7 +19,6 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import api from 'api';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const validationSchema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
@@ -48,7 +47,7 @@ function AddUserModal({ isOpen, onClose, refresher }) {
         throw new Error('Error saving user');
       }
       toast.success('User added successfully!', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
       onClose(); // Close the modal on successful save
       refresher((prev) => !prev); // Refresh the data in the parent component
@@ -56,7 +55,7 @@ function AddUserModal({ isOpen, onClose, refresher }) {
     } catch (error) {
       console.error('Error saving user:', error);
       toast.error('Error saving user.', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
     } finally {
       setSubmitting(false);

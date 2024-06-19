@@ -17,7 +17,6 @@ import {
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import api from 'api';
 
@@ -31,14 +30,14 @@ const AddCompanyModal = ({ isOpen, onClose, refresher }) => {
       const response = await api.post('/api/companies/', values);
       console.log(response); // Log the response from the server
       toast.success('Company added successfully!', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
       onClose(); // Close the modal on successful save
       refresher((prev) => !prev); // Refresh the data in the parent component
     } catch (error) {
       console.error('Error saving company:', error);
       toast.error('Error saving company.', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
     } finally {
       setSubmitting(false);

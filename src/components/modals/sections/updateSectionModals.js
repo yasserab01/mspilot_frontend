@@ -21,7 +21,6 @@ import { DeleteIcon, AddIcon } from "@chakra-ui/icons";
 import { Formik, Form, Field, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import api from 'api';
 
@@ -67,14 +66,14 @@ function UpdateSectionModal({ isOpen, onClose, section, refresher }) {
       });
       console.log(response); // Log the response from the server
       toast.success('Section updated successfully!', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
       onClose(); // Close the modal on successful save
       refresher((prev) => !prev); // Trigger a re-fetch of the data
     } catch (error) {
       console.error('Error updating section:', error);
       toast.error('Error updating section.', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
     } finally {
       setIsLoading(false);

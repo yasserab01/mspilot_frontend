@@ -19,7 +19,6 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import api from 'api';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { UserContext } from 'contexts/UserContext';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants';
 
@@ -66,7 +65,7 @@ function ChangePasswordModal({ isOpen, onClose, refresher }) {
       }
       
       toast.success('Password changed successfully!', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
       onClose(); // Close the modal on successful save
       logout(); // Logout the user
@@ -75,7 +74,7 @@ function ChangePasswordModal({ isOpen, onClose, refresher }) {
     } catch (error) {
       console.error('Error changing password:', error);
       toast.error('Error changing password.', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
     } finally {
       setSubmitting(false);

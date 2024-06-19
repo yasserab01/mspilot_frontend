@@ -51,14 +51,14 @@ function AddSectionModal({ isOpen, onClose, refresher }) {
       });
       console.log(response); // Log the response from the server
       toast.success('Section added successfully!', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
       onClose(); // Close the modal on successful save
       refresher((prev) => !prev); // Refresh the data in the parent component
     } catch (error) {
       console.error('Error saving section:', error);
       toast.error('Error saving section.', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
     } finally {
       setSubmitting(false);

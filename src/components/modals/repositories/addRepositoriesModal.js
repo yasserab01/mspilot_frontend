@@ -53,14 +53,14 @@ const AddRepositoryModal = ({ isOpen, onClose, refresher }) => {
       });
       console.log(response); // Log the successful server response
       toast.success('Repository added successfully!', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
       onClose(); // Close the modal on successful save
       refresher((prev) => !prev); // Trigger a refresh of the parent component's data
     } catch (error) {
       console.error('Error saving repository:', error); // Log any errors encountered during save
       toast.error('Error saving repository.', {
-        position: 'bottom-center',
+        position: 'top-center',
       });
     }
   };
