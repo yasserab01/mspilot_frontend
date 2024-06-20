@@ -9,10 +9,21 @@ jobs:
   frontend-deploy:
     runs-on: ubuntu-latest
     steps:
+    
       - uses: actions/checkout@v2
-      - name: Verify Frontend Directory
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Pull Docker Image from Docker Hub
         run: |
-          ls -la
+          docker pull ${{ secrets.DOCKER_USERNAME }}/mspilot-frontend:latest
+
+      - name: Verify Pulled Docker Image
+        run: |
+          docker images
       - name: Build Frontend
         run: |
           yarn install
